@@ -4,14 +4,6 @@
 //
 //  Created by Khaleeqa Garrett on 10/23/24.
 //
-
-
-// BabyDevelopment.swift
-// StorkCare+
-//
-// Created by Khaleeqa Garrett on 10/23/24.
-//
-
 import Foundation
 
 struct BabyDevelopment {
