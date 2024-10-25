@@ -3,7 +3,8 @@
 // StorkCare+
 //
 // Created by Khaleeqa Garrett on 10/23/24.
-//import SwiftUI
+
+import SwiftUI
 
 struct HealthDataEntryPage: View {
     @State private var name: String = ""
