@@ -55,7 +55,7 @@ struct IntroductionPage: View {
                         Text("Medication Reminder")
                             .font(.headline)
                             .bold()
-                            .foregroundColor(.pink)
+                            .foregroundColor(.black)
                         Text("Set reminders to take medications on time.")
                             .font(.subheadline)
                             .foregroundColor(.black)
