@@ -1,10 +1,3 @@
-//
-//  AddMedicationView.swift
-//  StorkCare+
-//
-//  Created by Khaleeqa Garrett on 10/25/24.
-//
-
 import SwiftUI
 
 struct AddMedicationView: View {
@@ -19,72 +12,70 @@ struct AddMedicationView: View {
     let medicationTypes = ["Capsule", "Tablet", "Liquid", "Topical", "Ointment", "Injection", "Spray"]
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 20) {
-                Text("Add Medication")
-                    .font(.title)
-                    .padding()
-
-                // Bold label for medication name
-                Text("Medication Name:")
-                    .font(.headline)
-                    .bold()
-                    .padding(.top)
-
-                // Input for medication name
-                TextField("Enter Medication Name", text: $medicationName)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-
-                // Medication type selection
-                Text("Choose the Medication Type:")
-                    .font(.headline)
-                    .bold()
-                    .padding(.top)
-
-                Picker("Medication Type", selection: $selectedMedicationType) {
-                    ForEach(medicationTypes, id: \.self) { type in
-                        Text(type)
-                    }
-                }
-                .pickerStyle(MenuPickerStyle()) // Change to your preferred picker style
+        VStack(spacing: 20) {
+            Text("Add Medication")
+                .font(.title)
                 .padding()
 
-                // Next button to navigate to set schedule view
-                Button("Next") {
-                    if medicationName.isEmpty {
-                        showAlert(message: "Please enter the medication name.")
-                    } else {
-                        // Navigate to the set schedule view
-                        showingSetSchedule = true
-                    }
-                }
+            // Bold label for medication name
+            Text("Medication Name:")
+                .font(.headline)
+                .bold()
+                .padding(.top)
+
+            // Input for medication name
+            TextField("Enter Medication Name", text: $medicationName)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
-                .background(Color.green)
-                .foregroundColor(.white)
-                .cornerRadius(10)
 
-                // Alert for missing information
-                .alert(isPresented: $showAlert) {
-                    Alert(title: Text("Error"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
+            // Medication type selection
+            Text("Choose the Medication Type:")
+                .font(.headline)
+                .bold()
+                .padding(.top)
+
+            Picker("Medication Type", selection: $selectedMedicationType) {
+                ForEach(medicationTypes, id: \.self) { type in
+                    Text(type)
                 }
+            }
+            .pickerStyle(MenuPickerStyle())
+            .padding()
 
-                // Navigation to set schedule view
-                .navigationDestination(isPresented: $showingSetSchedule) {
-                    SetScheduleView(medications: $medications) // Assuming you have this view defined
+            // Next button to navigate to set schedule view
+            Button("Next") {
+                if medicationName.isEmpty {
+                    showAlert(message: "Please enter the medication name.")
+                } else {
+                    // Navigate to the set schedule view
+                    showingSetSchedule = true
                 }
             }
             .padding()
+            .background(Color.green)
+            .foregroundColor(.white)
+            .cornerRadius(10)
+
+            // Alert for missing information
+            .alert(isPresented: $showAlert) {
+                Alert(title: Text("Error"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
+            }
+            // Navigation to set schedule view
+            .navigationDestination(isPresented: $showingSetSchedule) {
+                SetScheduleView(medications: $medications)
+            }
         }
+        .padding()
     }
 
     // Function to handle alert display
-    func showAlert(message: String) {
+    private func showAlert(message: String) {
         alertMessage = message
         showAlert = true
     }
 }
 
+// Preview
 #Preview {
-    AddMedicationView(medications: .constant([])) // Preview with empty medication list
+    AddMedicationView(medications: .constant([]))
 }
