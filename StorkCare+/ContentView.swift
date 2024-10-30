@@ -1,15 +1,9 @@
-//
-// ContentView.swift
-// StorkCare+
-//
-// Created by Khaleeqa Garrett on 10/23/24.
-//
-
 import SwiftUI
 
 struct ContentView: View {
     @State private var searchText: String = "" // State variable for the search bar
-    
+    @State private var medications: [Medication] = [] // State variable to hold medications
+
     // Define the use cases with their names, icons, and colors
     let useCases: [(title: String, icon: String, color: Color)] = [
         ("Track Baby Development", "chart.bar.fill", .pink),
@@ -81,7 +75,7 @@ struct ContentView: View {
         case "Schedule Telehealth Consultation":
             ScheduleTelehealthView()
         case "Medication Reminder":
-            SetupMedicationView(medications: .constant([]))
+            SetupMedicationView(medications: $medications) // Use the binding to medications
         default:
             Text("Unknown use case")
         }
