@@ -11,7 +11,7 @@ struct StorkCarePlusApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationStack {
-                IntroductionPage() // Starts from the Introduction page
+                RegistrationView() // Starts from the Introduction page
             }
         }
     }
