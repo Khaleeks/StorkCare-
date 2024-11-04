@@ -1,9 +1,3 @@
-//  StorkCarePlusApp.swift
-//  StorkCare+
-//
-//  Created by Khaleeqa Garrett on 10/23/24.
-//
-
 import SwiftUI
 import SwiftData
 
@@ -12,10 +6,9 @@ struct StorkCarePlusApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationStack {
-                RegistrationView() // Starts from the Registration page
+                RegistrationView() // Your starting view
             }
-            // Registering the User model with SwiftData for persistence
-            .modelContainer(for: User.self)
+            .modelContainer(for: AppUser.self) // Register AppUser for persistence
         }
     }
 }

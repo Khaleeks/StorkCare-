@@ -2,11 +2,11 @@ import SwiftUI
 import Foundation
 
 struct RegistrationView: View {
-    @State private var users: [AppUser] = [] // Update to use AppUser
+    @State private var users: [AppUser] = [] // Change User to AppUser
     @State private var name: String = ""
     @State private var email: String = ""
     @State private var password: String = ""
-    @State private var selectedUser: AppUser? = nil // Update to use AppUser
+    @State private var selectedUser: AppUser? = nil // Track selected user for login
     @State private var isRegistered = false // State to check registration status
     @State private var showRegistrationFields = false // Show registration form
     @State private var message: String? = nil // For displaying registration messages
@@ -19,7 +19,6 @@ struct RegistrationView: View {
                     .bold()
                     .padding()
 
-                // Display list of existing users
                 if users.isEmpty {
                     Text("No registered users. Please register a new user.")
                         .padding()
@@ -38,7 +37,6 @@ struct RegistrationView: View {
                     }
                 }
 
-                // Show registration form for new user or updating details
                 if showRegistrationFields {
                     TextField("Full Name", text: $name)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -82,23 +80,20 @@ struct RegistrationView: View {
         }
     }
 
-    // Load selected user's details for autofill
-    private func loadUserDetails(user: AppUser) { // Update to use AppUser
+    private func loadUserDetails(user: AppUser) {
         name = user.name
         email = user.email
         password = user.password
         isRegistered = true // Navigate to next page after selecting user
     }
 
-    // Register a new user and add to the local array
     private func registerUser(name: String, email: String, password: String) {
-        let newUser = AppUser(name: name, email: email, password: password) // Update to use AppUser
+        let newUser = AppUser(name: name, email: email, password: password)
         users.append(newUser) // Add the new user to the local array
         message = "Registration successful!" // Confirmation message
         isRegistered = true // Set registration status to true
     }
 
-    // Clear fields after registration or when canceling registration
     private func clearFields() {
         name = ""
         email = ""
