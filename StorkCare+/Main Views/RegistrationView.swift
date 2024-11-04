@@ -18,10 +18,14 @@ struct RegistrationView: View {
                     .font(.largeTitle)
                     .bold()
                     .padding()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5) // Scale down to fit within one line if needed
 
                 if users.isEmpty {
                     Text("No registered users. Please register a new user.")
                         .padding()
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5) // Adjust text size to fit within one line if needed
                 } else {
                     Text("Select an existing user:")
                     List(users) { user in
