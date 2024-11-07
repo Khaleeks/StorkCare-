@@ -1,14 +1,10 @@
-// BabyDevelopment.swift
-// StorkCare+
-//
-// Created by Khaleeqa Garrett on 10/23/24.
-
 import SwiftUI
 
-struct ScheduleTelehealthView: View {
-    @State private var selectedSlot: String = ""
+struct ProviderAvailabilityView: View {
+    
     @State private var selectedProvider: String = ""
-    @State private var selectedDate: Date = Date() // New state variable for the selected date
+    @State private var selectedDate: Date = Date()
+    @State private var availableSlot: String = ""
     @State private var confirmationMessage: String = ""
     @State private var showRescheduleOptions: Bool = false
     @State private var availableSlots: [String] = []
@@ -16,8 +12,8 @@ struct ScheduleTelehealthView: View {
     @State private var providerUnavailable: Bool = false
     
     // Mock data for providers and available slots
-    private let providers = ["Dr. Smith", "Dr. Johnson", "Dr. Lee"]
-    private let allAvailableSlots: [String: [String]] = [
+    private var providers = ["Dr. Smith", "Dr. Johnson", "Dr. Lee"]
+    @State private var allAvailableSlots: [String: [String]] = [
         "Dr. Smith": ["9:00 AM", "10:30 AM", "1:00 PM", "3:00 PM"],
         "Dr. Johnson": ["10:00 AM", "11:30 AM", "2:00 PM"],
         "Dr. Lee": [] // Dr. Lee is unavailable
@@ -25,7 +21,7 @@ struct ScheduleTelehealthView: View {
 
     var body: some View {
         VStack(spacing: 20) {
-            Text("Schedule a Telehealth Consultation")
+            Text("Update Availability")
                 .font(.largeTitle)
                 .foregroundColor(.white)
                 .padding()
@@ -38,7 +34,7 @@ struct ScheduleTelehealthView: View {
                 .cornerRadius(10)
 
             // Provider Selection
-            Text("Select a Healthcare Provider:")
+            Text("Select Your Healthcare Provider:")
                 .font(.headline)
                 .foregroundColor(.pink)
 
@@ -55,36 +51,39 @@ struct ScheduleTelehealthView: View {
                 loadAvailableSlots(for: selectedProvider)
             }
 
-
-            // Display availability message
-            if providerUnavailable {
-                Text("This provider is currently unavailable.")
-                    .foregroundColor(.red)
-                    .padding()
-            } else if noSlotsAvailable {
-                Text("No slots available at this time. We'll notify you when slots open up.")
-                    .foregroundColor(.red)
-                    .padding()
-            } else {
-                // Available Slots Picker
-                if !availableSlots.isEmpty {
-                    Picker("Select a Time Slot", selection: $selectedSlot) {
-                        ForEach(availableSlots, id: \.self) { slot in
-                            Text(slot)
-                        }
-                    }
-                    .pickerStyle(MenuPickerStyle())
-                    .padding()
-                    .background(RoundedRectangle(cornerRadius: 10).fill(Color.white))
-                    .cornerRadius(10)
-                }
+            // Displaying current available slots
+            Text("Current Available Slots:")
+                .font(.headline)
+                .foregroundColor(.black)
+            List(availableSlots, id: \.self) { slot in
+                Text(slot)
             }
+
+            // Slot Input Field
+            TextField("Add a Time Slot (e.g., 4:00 PM)", text: $availableSlot)
+                .padding()
+                .background(RoundedRectangle(cornerRadius: 10).fill(Color.white))
+                .cornerRadius(10)
+
+            // Add Slot Button
+            Button(action: {
+                addTimeSlot()
+            }) {
+                Text("Add Time Slot")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.green)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+            .padding()
+            .disabled(availableSlot.isEmpty)
 
             // Confirm Button
             Button(action: {
-                confirmAppointment()
+                confirmAvailability()
             }) {
-                Text("Confirm Appointment")
+                Text("Confirm Availability Update")
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(Color.blue)
@@ -92,7 +91,7 @@ struct ScheduleTelehealthView: View {
                     .cornerRadius(10)
             }
             .padding()
-            .disabled(selectedSlot.isEmpty || providerUnavailable || noSlotsAvailable)
+            .disabled(selectedProvider.isEmpty || availableSlots.isEmpty)
 
             // Confirmation Message
             if !confirmationMessage.isEmpty {
@@ -117,9 +116,9 @@ struct ScheduleTelehealthView: View {
             }
         }
         .padding()
-        .background(Color.blue.opacity(0.1)) // Light blue background
+        .background(Color.blue.opacity(0.1))
         .cornerRadius(20)
-        .shadow(radius: 5) // Add shadow for a lifted effect
+        .shadow(radius: 5)
         .onAppear {
             selectedProvider = providers.first ?? ""
             loadAvailableSlots(for: selectedProvider)
@@ -128,49 +127,38 @@ struct ScheduleTelehealthView: View {
 
     // Load available slots based on selected provider
     private func loadAvailableSlots(for provider: String) {
-        if let slots = allAvailableSlots[provider] {
-            availableSlots = slots
-            noSlotsAvailable = slots.isEmpty && provider != "Dr. Lee"
-            providerUnavailable = provider == "Dr. Lee" && slots.isEmpty
-        }
+        availableSlots = allAvailableSlots[provider, default: []]
+        providerUnavailable = availableSlots.isEmpty
     }
 
-    // Confirm the appointment
-    private func confirmAppointment() {
-        if selectedSlot.isEmpty {
-            confirmationMessage = "Please select a time slot."
-        } else {
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateStyle = .medium
-            let formattedDate = dateFormatter.string(from: selectedDate)
+    // Add a new time slot to the provider's availability
+    private func addTimeSlot() {
+        guard !availableSlot.isEmpty else { return }
+        allAvailableSlots[selectedProvider]?.append(availableSlot)
+        loadAvailableSlots(for: selectedProvider) // Refresh available slots
+        availableSlot = "" // Clear the input field
+    }
 
-            confirmationMessage = "Appointment confirmed with \(selectedProvider) on \(formattedDate) at \(selectedSlot)."
-            showRescheduleOptions = true
-            sendNotification()
-        }
+    // Confirm the availability update
+    private func confirmAvailability() {
+        confirmationMessage = "Availability updated for \(selectedProvider)."
+        showRescheduleOptions = true
+        sendNotification()
     }
 
     // Mock function to send a notification
     private func sendNotification() {
-        // In a real-world scenario, this would integrate with notification services to send reminders
-        print("Notification sent to user and provider.")
-    }
-
-    // Reset selections
-    private func resetSelection() {
-        providerUnavailable = false
-        selectedProvider = ""
-        selectedSlot = ""
+        print("Notification sent to user about updated availability.")
     }
 
     // Reschedule the appointment
     private func rescheduleAppointment() {
         confirmationMessage = ""
-        selectedSlot = ""
+        availableSlot = ""
         showRescheduleOptions = false
     }
 }
 
 #Preview {
-    ScheduleTelehealthView()
+    ProviderAvailabilityView()
 }
