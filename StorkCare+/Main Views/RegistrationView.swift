@@ -7,7 +7,6 @@ struct RegistrationView: View {
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var role: String = "" // Stores selected role
-    @State private var isRegistered = false
     @State private var message: String? = nil
     @State private var uid: String = "" // State variable to store the user's UID
 
@@ -49,12 +48,12 @@ struct RegistrationView: View {
             
             if let message = message {
                 Text(message)
-                    .foregroundColor(isRegistered ? .green : .red)
+                    .foregroundColor(.green)
                     .padding()
             }
         }
-        .navigationDestination(isPresented: $isRegistered) {
-            // Navigate to role-specific onboarding view
+        .navigationDestination(isPresented: $isAuthenticated) {
+            // Navigate to role-specific onboarding view based on role
             if role == "Healthcare Provider" {
                 HealthcarePage(uid: uid)
             } else if role == "Pregnant Woman" {
@@ -72,7 +71,7 @@ struct RegistrationView: View {
         Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
             if let error = error {
                 message = "Registration failed: \(error.localizedDescription)"
-                isRegistered = false
+                isAuthenticated = false
                 return
             }
             
@@ -92,10 +91,10 @@ struct RegistrationView: View {
         ]) { error in
             if let error = error {
                 message = "Failed to save user data: \(error.localizedDescription)"
-                isRegistered = false
+                isAuthenticated = false
             } else {
-                isRegistered = true
                 message = "Registration successful!"
+                isAuthenticated = true // Set this to true after successful registration and data save
             }
         }
     }

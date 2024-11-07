@@ -35,11 +35,17 @@ struct StorkCare_App: App {
     }
     
     func checkAuthenticationStatus() {
-        // Check if the user is already signed in with Firebase Auth
-        if Auth.auth().currentUser != nil {
+        // Force sign out first (for testing purposes, to ensure we start fresh)
+        try? Auth.auth().signOut()
+        
+        // Check current user status
+        if let user = Auth.auth().currentUser {
+            print("User is authenticated with UID: \(user.uid)")
             isAuthenticated = true
         } else {
+            print("No user is currently authenticated")
             isAuthenticated = false
         }
     }
+
 }
