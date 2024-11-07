@@ -1,11 +1,8 @@
-// BabyDevelopment.swift
-// StorkCare+
-//
-// Created by Khaleeqa Garrett on 10/23/24.
-//
 import SwiftUI
 
 struct IntroductionPage: View {
+    @Binding var isAuthenticated: Bool // Binding to update authentication state
+
     var body: some View {
         VStack(spacing: 40) {
             Spacer() // Slightly pushes the welcome text down
@@ -26,7 +23,7 @@ struct IntroductionPage: View {
                             .font(.headline)
                             .bold()
                             .foregroundColor(.black)
-                        Text("Conveniently schedule telehealth consultations with your choosen healthcare provider.")
+                        Text("Conveniently schedule telehealth consultations with your chosen healthcare provider.")
                             .font(.subheadline)
                             .foregroundColor(.black)
                     }
@@ -66,7 +63,7 @@ struct IntroductionPage: View {
 
             Spacer()
 
-            NavigationLink(destination: HealthDataEntryPage()) {
+            NavigationLink(destination: RegistrationView(isAuthenticated: $isAuthenticated)) {
                 Text("Continue")
                     .bold()
                     .frame(maxWidth: .infinity)
@@ -82,5 +79,7 @@ struct IntroductionPage: View {
 }
 
 #Preview {
-    IntroductionPage()
+    NavigationStack {
+        IntroductionPage(isAuthenticated: .constant(false))
+    }
 }

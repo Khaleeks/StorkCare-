@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		64B3535A2CDC9161004CC609 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 64B353592CDC9161004CC609 /* FirebaseAuth */; };
+		64B3535C2CDC9161004CC609 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 64B3535B2CDC9161004CC609 /* FirebaseFirestore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		AFADD6682CC904D800F68C89 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +57,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				64B3535A2CDC9161004CC609 /* FirebaseAuth in Frameworks */,
+				64B3535C2CDC9161004CC609 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +119,8 @@
 			);
 			name = "StorkCare+";
 			packageProductDependencies = (
+				64B353592CDC9161004CC609 /* FirebaseAuth */,
+				64B3535B2CDC9161004CC609 /* FirebaseFirestore */,
 			);
 			productName = "StorkCare+";
 			productReference = AFADD6552CC904D500F68C89 /* StorkCare+.app */;
@@ -197,6 +206,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				AFA16B262CD2594900BC8383 /* XCRemoteSwiftPackageReference "SQLite" */,
+				64B353582CDC9161004CC609 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AFADD6562CC904D500F68C89 /* Products */;
@@ -557,6 +567,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		64B353582CDC9161004CC609 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.4.0;
+			};
+		};
 		AFA16B262CD2594900BC8383 /* XCRemoteSwiftPackageReference "SQLite" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/stephencelis/SQLite.swift";
@@ -566,6 +584,19 @@
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		64B353592CDC9161004CC609 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 64B353582CDC9161004CC609 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		64B3535B2CDC9161004CC609 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 64B353582CDC9161004CC609 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = AFADD64D2CC904D500F68C89 /* Project object */;
 }

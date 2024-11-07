@@ -1,106 +1,99 @@
 import SwiftUI
-import Foundation
+import FirebaseAuth
+import FirebaseFirestore
 
 struct RegistrationView: View {
-    @State private var users: [AppUser] = [] // Change User to AppUser
-    @State private var name: String = ""
+    @Binding var isAuthenticated: Bool // Binding to update the authentication state
     @State private var email: String = ""
     @State private var password: String = ""
-    @State private var selectedUser: AppUser? = nil // Track selected user for login
-    @State private var isRegistered = false // State to check registration status
-    @State private var showRegistrationFields = false // Show registration form
-    @State private var message: String? = nil // For displaying registration messages
+    @State private var role: String = "" // Stores selected role
+    @State private var message: String? = nil
+    @State private var uid: String = "" // State variable to store the user's UID
 
+    let db = Firestore.firestore()
+    
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 20) {
-                Text("Register for StorkCare+")
-                    .font(.largeTitle)
-                    .bold()
-                    .padding()
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.5) // Scale down to fit within one line if needed
-
-                if users.isEmpty {
-                    Text("No registered users. Please register a new user.")
-                        .padding()
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.5) // Adjust text size to fit within one line if needed
-                } else {
-                    Text("Select an existing user:")
-                    List(users) { user in
-                        Button(action: {
-                            selectedUser = user
-                            loadUserDetails(user: user)
-                        }) {
-                            HStack {
-                                Text(user.name)
-                                Text(user.email).foregroundColor(.gray)
-                            }
-                        }
-                    }
-                }
-
-                if showRegistrationFields {
-                    TextField("Full Name", text: $name)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding(.horizontal)
-
-                    TextField("Email", text: $email)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding(.horizontal)
-                        .autocapitalization(.none)
-                        .keyboardType(.emailAddress)
-
-                    SecureField("Password", text: $password)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding(.horizontal)
-
-                    Button("Register New User") {
-                        registerUser(name: name, email: email, password: password)
-                    }
-                    .padding()
-                    .background(Color.pink)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-
-                    if let message = message {
-                        Text(message)
-                            .foregroundColor(.green)
-                            .padding()
-                    }
-                }
-
-                Button(showRegistrationFields ? "Cancel" : "Register New User") {
-                    showRegistrationFields.toggle()
-                    if !showRegistrationFields { clearFields() }
-                }
-                .padding(.top)
+        VStack(spacing: 20) {
+            Text("Register for StorkCare+")
+                .font(.largeTitle)
+                .bold()
+                .padding()
+            
+            TextField("Email", text: $email)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding(.horizontal)
+                .autocapitalization(.none)
+                .keyboardType(.emailAddress)
+            
+            SecureField("Password", text: $password)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding(.horizontal)
+            
+            // Picker for Role Selection
+            Picker("Select Your Role", selection: $role) {
+                Text("Healthcare Provider").tag("Healthcare Provider")
+                Text("Pregnant Woman").tag("Pregnant Woman")
+            }
+            .pickerStyle(SegmentedPickerStyle())
+            .padding(.horizontal)
+            
+            Button("Register") {
+                registerUser(email: email, password: password, role: role)
             }
             .padding()
-            .navigationDestination(isPresented: $isRegistered) {
-                IntroductionPage() // Navigate to IntroductionPage after registration
+            .background(role.isEmpty ? Color.gray : Color.pink)
+            .foregroundColor(.white)
+            .cornerRadius(10)
+            .disabled(role.isEmpty) // Disable if role is not selected
+            
+            if let message = message {
+                Text(message)
+                    .foregroundColor(isAuthenticated ? .green : .red)
+                    .padding()
+            }
+        }
+        .onAppear {
+            // Check if user is already authenticated
+            if Auth.auth().currentUser != nil {
+                isAuthenticated = true
             }
         }
     }
-
-    private func loadUserDetails(user: AppUser) {
-        name = user.name
-        email = user.email
-        password = user.password
-        isRegistered = true // Navigate to next page after selecting user
+    
+    func registerUser(email: String, password: String, role: String) {
+        guard !role.isEmpty else {
+            message = "Please select a role"
+            return
+        }
+        
+        Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
+            if let error = error {
+                message = "Registration failed: \(error.localizedDescription)"
+                isAuthenticated = false
+                return
+            }
+            
+            // Store the user's UID in the state variable
+            if let user = authResult?.user {
+                uid = user.uid
+                saveUserData(uid: user.uid, email: email, role: role)
+            }
+        }
     }
-
-    private func registerUser(name: String, email: String, password: String) {
-        let newUser = AppUser(name: name, email: email, password: password)
-        users.append(newUser) // Add the new user to the local array
-        message = "Registration successful!" // Confirmation message
-        isRegistered = true // Set registration status to true
-    }
-
-    private func clearFields() {
-        name = ""
-        email = ""
-        password = ""
+    
+    func saveUserData(uid: String, email: String, role: String) {
+        db.collection("users").document(uid).setData([
+            "email": email,
+            "role": role,
+            "isOnboarded": false // Track onboarding completion
+        ]) { error in
+            if let error = error {
+                message = "Failed to save user data: \(error.localizedDescription)"
+                isAuthenticated = false
+            } else {
+                isAuthenticated = true
+                message = "Registration successful!"
+            }
+        }
     }
 }
