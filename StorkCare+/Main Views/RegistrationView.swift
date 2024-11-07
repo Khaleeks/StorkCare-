@@ -3,10 +3,11 @@ import FirebaseAuth
 import FirebaseFirestore
 
 struct RegistrationView: View {
-    @Binding var isAuthenticated: Bool // Binding to update the authentication state
+    @Binding var isAuthenticated: Bool
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var role: String = "" // Stores selected role
+    @State private var isRegistered = false
     @State private var message: String? = nil
     @State private var uid: String = "" // State variable to store the user's UID
 
@@ -48,14 +49,16 @@ struct RegistrationView: View {
             
             if let message = message {
                 Text(message)
-                    .foregroundColor(isAuthenticated ? .green : .red)
+                    .foregroundColor(isRegistered ? .green : .red)
                     .padding()
             }
         }
-        .onAppear {
-            // Check if user is already authenticated
-            if Auth.auth().currentUser != nil {
-                isAuthenticated = true
+        .navigationDestination(isPresented: $isRegistered) {
+            // Navigate to role-specific onboarding view
+            if role == "Healthcare Provider" {
+                HealthcarePage(uid: uid)
+            } else if role == "Pregnant Woman" {
+                PregnantWomanPage(uid: uid)
             }
         }
     }
@@ -69,7 +72,7 @@ struct RegistrationView: View {
         Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
             if let error = error {
                 message = "Registration failed: \(error.localizedDescription)"
-                isAuthenticated = false
+                isRegistered = false
                 return
             }
             
@@ -89,9 +92,9 @@ struct RegistrationView: View {
         ]) { error in
             if let error = error {
                 message = "Failed to save user data: \(error.localizedDescription)"
-                isAuthenticated = false
+                isRegistered = false
             } else {
-                isAuthenticated = true
+                isRegistered = true
                 message = "Registration successful!"
             }
         }
