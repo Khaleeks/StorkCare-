@@ -21,6 +21,7 @@ struct HealthcarePage: View {
         VStack {
             Text("Healthcare Provider Onboarding")
                 .font(.largeTitle)
+                .lineLimit(1)
                 .padding()
             
             TextField("Gender", text: $gender)
@@ -39,7 +40,7 @@ struct HealthcarePage: View {
                 saveHealthcareProviderData()
             }
             .padding()
-            .background(Color.blue)
+            .background(Color.pink)
             .foregroundColor(.white)
             .cornerRadius(10)
             
