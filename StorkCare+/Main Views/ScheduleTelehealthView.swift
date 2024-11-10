@@ -1,9 +1,9 @@
 // BabyDevelopment.swift
 // StorkCare+
 //
-// Created by Khaleeqa Garrett on 10/23/24.
-
+// Created by Cassandra Salazar
 import SwiftUI
+import FirebaseFirestore
 
 struct ScheduleTelehealthView: View {
     @State private var selectedSlot: String = ""
@@ -54,7 +54,6 @@ struct ScheduleTelehealthView: View {
             .onChange(of: selectedProvider) { _ in
                 loadAvailableSlots(for: selectedProvider)
             }
-
 
             // Display availability message
             if providerUnavailable {
@@ -171,6 +170,8 @@ struct ScheduleTelehealthView: View {
     }
 }
 
-#Preview {
-    ScheduleTelehealthView()
+struct ScheduleTelehealthView_Previews: PreviewProvider {
+    static var previews: some View {
+        ScheduleTelehealthView()
+    }
 }

@@ -1,12 +1,16 @@
+//
+//  test_Provider.swift
+//  StorkCare+
+//
+//  Created by Cassandra Salazar on 11/10/24.
+
 import SwiftUI
-import Firebase
 import FirebaseFirestore
 
-
-struct ProviderAvailabilityView: View {
-    @State private var providerName: String = ""
-    @State private var appointmentTime: String = ""
-    @State private var appointmentDate: Date = Date()
+struct test_Provider: View {
+    @State private var gender: String = ""
+    @State private var occupation: String = ""
+    @State private var placeOfWork: String = ""
     @State private var message: String? = nil
     @State private var isOnboardingComplete = false // Navigate to features after completion
 
@@ -19,19 +23,20 @@ struct ProviderAvailabilityView: View {
                 .lineLimit(1)
                 .padding()
             
-            TextField("Provider Name", text: $providerName)
+            TextField("Gender", text: $gender)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding(.horizontal)
             
-            DatePicker("Select Appointment Date", selection: $appointmentDate, displayedComponents: [.date])
+            TextField("Occupation", text: $occupation)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding(.horizontal)
             
-            TextField("Appointment Time (e.g., 3:00 PM)", text: $appointmentTime)
+            TextField("Place of Work", text: $placeOfWork)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding(.horizontal)
             
             Button("Complete Onboarding") {
-                saveProviderData()
+                saveHealthcareProviderData()
             }
             .padding()
             .background(Color.pink)
@@ -49,21 +54,14 @@ struct ProviderAvailabilityView: View {
         }
     }
     
-    func saveProviderData() {
+    func saveHealthcareProviderData() {
         let db = Firestore.firestore()
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        let formattedDate = dateFormatter.string(from: appointmentDate)
-        
-        // Create the data to be saved
-        let providerData: [String: Any] = [
-            "name": providerName,
-            "appointmentTime": appointmentTime,
-            "appointmentDate": formattedDate
-        ]
-        
-        // Save the data under the 'providers' collection
-        db.collection("providers").document(providerName).setData(providerData) { error in
+        db.collection("users").document(uid).updateData([
+            "gender": gender,
+            "occupation": occupation,
+            "placeOfWork": placeOfWork,
+            "isOnboarded": true // Update onboarding status
+        ]) { error in
             if let error = error {
                 message = "Failed to save data: \(error.localizedDescription)"
                 isOnboardingComplete = false
@@ -73,8 +71,4 @@ struct ProviderAvailabilityView: View {
             }
         }
     }
-}
-
-#Preview {
-    ProviderAvailabilityView(uid: "sample-uid") // Pass a sample UID if needed
 }

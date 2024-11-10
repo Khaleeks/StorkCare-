@@ -8,7 +8,8 @@ struct ContentView: View {
     let useCases: [(title: String, icon: String, color: Color)] = [
         ("Track Baby Development", "chart.bar.fill", .pink),
         ("Schedule Telehealth Consultation", "video.fill", .purple),
-        ("Medication Reminder", "alarm.fill", .blue)
+        ("Medication Reminder", "alarm.fill", .blue),
+        ("Provider Availability", "calendar", .green)
     ]
     
     // Filter use cases based on search text
@@ -76,6 +77,8 @@ struct ContentView: View {
             ScheduleTelehealthView()
         case "Medication Reminder":
             SetupMedicationView(medications: $medications) // Use the binding to medications
+        case "Provider Availability":
+            ProviderAvailabilityView(uid: "")
         default:
             Text("Unknown use case")
         }
