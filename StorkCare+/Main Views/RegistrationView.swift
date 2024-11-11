@@ -1,100 +1,67 @@
+//
+//  PregnantWomanPage.swift
+//  StorkCare+
+//
+//  Created by Bamlak T on 11/7/24.
+//
+
+
+
 import SwiftUI
-import FirebaseAuth
-import FirebaseFirestore
 
 struct RegistrationView: View {
-    @Binding var isAuthenticated: Bool
-    @State private var email: String = ""
-    @State private var password: String = ""
-    @State private var role: String = "" // Stores selected role
-    @State private var message: String? = nil
-    @State private var uid: String = "" // State variable to store the user's UID
+    @Binding var isAuthenticated: Bool  // Use @Binding to accept a reference
 
-    let db = Firestore.firestore()
-    
+    @ObservedObject var viewModel = RegistrationViewModel()
+
     var body: some View {
         VStack(spacing: 20) {
             Text("Register for StorkCare+")
                 .font(.largeTitle)
                 .bold()
                 .padding()
-            
-            TextField("Email", text: $email)
+
+            TextField("Email", text: $viewModel.email)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding(.horizontal)
                 .autocapitalization(.none)
                 .keyboardType(.emailAddress)
-            
-            SecureField("Password", text: $password)
+
+            SecureField("Password", text: $viewModel.password)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding(.horizontal)
-            
-            // Picker for Role Selection
-            Picker("Select Your Role", selection: $role) {
+
+            Picker("Select Your Role", selection: $viewModel.role) {
                 Text("Healthcare Provider").tag("Healthcare Provider")
                 Text("Pregnant Woman").tag("Pregnant Woman")
             }
             .pickerStyle(SegmentedPickerStyle())
             .padding(.horizontal)
-            
+
             Button("Register") {
-                registerUser(email: email, password: password, role: role)
+                viewModel.registerUser()
             }
             .padding()
-            .background(role.isEmpty ? Color.gray : Color.pink)
+            .background(viewModel.role.isEmpty ? Color.gray : Color.pink)
             .foregroundColor(.white)
             .cornerRadius(10)
-            .disabled(role.isEmpty) // Disable if role is not selected
-            
-            if let message = message {
+            .disabled(viewModel.role.isEmpty)
+
+            if let message = viewModel.message {
                 Text(message)
                     .foregroundColor(.green)
                     .padding()
             }
-        }
-        .navigationDestination(isPresented: $isAuthenticated) {
-            // Navigate to role-specific onboarding view based on role
-            if role == "Healthcare Provider" {
-                HealthcarePage(uid: uid)
-            } else if role == "Pregnant Woman" {
-                PregnantWomanPage(uid: uid)
+
+            if viewModel.isLoading {
+                ProgressView()
             }
         }
-    }
-    
-    func registerUser(email: String, password: String, role: String) {
-        guard !role.isEmpty else {
-            message = "Please select a role"
-            return
-        }
-        
-        Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
-            if let error = error {
-                message = "Registration failed: \(error.localizedDescription)"
-                isAuthenticated = false
-                return
-            }
-            
-            // Store the user's UID in the state variable
-            if let user = authResult?.user {
-                uid = user.uid
-                saveUserData(uid: user.uid, email: email, role: role)
-            }
-        }
-    }
-    
-    func saveUserData(uid: String, email: String, role: String) {
-        db.collection("users").document(uid).setData([
-            "email": email,
-            "role": role,
-            "isOnboarded": false // Track onboarding completion
-        ]) { error in
-            if let error = error {
-                message = "Failed to save user data: \(error.localizedDescription)"
-                isAuthenticated = false
-            } else {
-                message = "Registration successful!"
-                isAuthenticated = true // Set this to true after successful registration and data save
+        .navigationDestination(isPresented: $viewModel.isAuthenticated) {
+            if viewModel.role == "Healthcare Provider" {
+                HealthcarePage(uid: "someUID") // Example UID
+            } else if viewModel.role == "Pregnant Woman" {
+                PregnantWomanPage(uid: "someUID") // Example UID
             }
         }
     }
