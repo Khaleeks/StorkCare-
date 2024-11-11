@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import FirebaseFirestore
 
 struct PregnantWomanPage: View {
     let uid: String
@@ -17,6 +18,8 @@ struct PregnantWomanPage: View {
     @State private var selectedHeight: Int = 160 // Default value for height
     @State private var selectedWeight: Int = 70 // Default value for weight
     @State private var medicalHistory: String = "" // New field for past medical history
+    @State private var isProfileCreated = false
+    @State private var message: String? = nil
 
     @State private var showSexPicker = false
     @State private var showHeightPicker = false
@@ -121,18 +124,23 @@ struct PregnantWomanPage: View {
                 }
             }
             .padding()
-
-            NavigationLink(destination: ContentView()) {
-                Text("Continue")
-                    .bold()
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.pink)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                    .padding(.horizontal)
+            
+            Button("Continue"){
+                savePregnantWomanData()
             }
+            .bold()
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(Color.pink)
+            .foregroundColor(.white)
+            .cornerRadius(10)
+            .padding(.horizontal)
+            
         }
+        .navigationDestination(isPresented: $isProfileCreated){
+            ContentView() //Naviagte to main features page
+        }
+        
         .padding()
         
         // Sex Picker Bottom Sheet
@@ -272,9 +280,30 @@ struct PregnantWomanPage: View {
         formatter.dateStyle = .medium
         return formatter.string(from: date)
     }
+    
+    func savePregnantWomanData(){
+        let db = Firestore.firestore()
+        db.collection("PregnantUsers").document(uid).updateData([
+            "name": name,
+            "selectedSex": selectedSex,
+            "dateOfBirth": dateOfBirth,
+            "pregnancyStartDate": pregnancyStartDate,
+            "medicalHistory": medicalHistory,
+            "selectedHeight": selectedHeight,
+            "selectedWeight": selectedWeight,
+            "isProfileCreated" : true
+        ]) { error in
+            if let error = error {
+                message = "Failed to save data: \(error.localizedDescription)"
+                isProfileCreated = false
+            } else {
+                message = "Health profile has been updated!"
+                isProfileCreated = true
+            }
+        }
+    }
 }
 
 #Preview {
     PregnantWomanPage(uid: "sampleUID")
 }
-
