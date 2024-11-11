@@ -72,7 +72,7 @@ struct ContentView: View {
     private func destinationView(for useCase: String) -> some View {
         switch useCase {
         case "Track Baby Development":
-            TrackBabyDevelopmentView()
+            TrackBabyDevelopmentView(uid: "")
         case "Schedule Telehealth Consultation":
             ScheduleTelehealthView()
         case "Medication Reminder":
