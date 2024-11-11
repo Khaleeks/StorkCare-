@@ -1,16 +1,15 @@
 import SwiftUI
 
 struct AddMedicationView: View {
-    @Binding var medications: [Medication] // Binding to the list of medications
-    @State private var medicationName: String = ""
-    @State private var selectedMedicationType: String = "Capsule" // Default selection
-    @State private var showAlert = false
-    @State private var alertMessage = ""
-    @State private var showingSetSchedule = false // State for navigation to set schedule
+    @Binding var medications: [Medication] // Binding to the medications list
+    @StateObject private var viewModel: AddMedicationViewModel
 
-    // List of medication types
-    let medicationTypes = ["Capsule", "Tablet", "Liquid", "Topical", "Ointment", "Injection", "Spray"]
-
+    // Initialize the view model with medications
+       init(medications: Binding<[Medication]>) {
+           _medications = medications
+           _viewModel = StateObject(wrappedValue: AddMedicationViewModel(medications: medications.wrappedValue))
+       }
+    
     var body: some View {
         VStack(spacing: 20) {
             Text("Add Medication")
@@ -24,7 +23,7 @@ struct AddMedicationView: View {
                 .padding(.top)
 
             // Input for medication name
-            TextField("Enter Medication Name", text: $medicationName)
+            TextField("Enter Medication Name", text: $viewModel.medicationName)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
 
@@ -34,8 +33,9 @@ struct AddMedicationView: View {
                 .bold()
                 .padding(.top)
 
-            Picker("Medication Type", selection: $selectedMedicationType) {
-                ForEach(medicationTypes, id: \.self) { type in
+            // Access medication types from the view model
+            Picker("Medication Type", selection: $viewModel.selectedMedicationType) {
+                ForEach(viewModel.medicationTypes, id: \.self) { type in
                     Text(type)
                 }
             }
@@ -44,34 +44,21 @@ struct AddMedicationView: View {
 
             // Next button to navigate to set schedule view
             Button("Next") {
-                if medicationName.isEmpty {
-                    showAlert(message: "Please enter the medication name.")
-                } else {
-                    // Navigate to the set schedule view
-                    showingSetSchedule = true
-                }
+                viewModel.onNextButtonTapped()
             }
             .padding()
             .background(Color.green)
             .foregroundColor(.white)
             .cornerRadius(10)
-
-            // Alert for missing information
-            .alert(isPresented: $showAlert) {
-                Alert(title: Text("Error"), message: Text(alertMessage), dismissButton: .default(Text("OK")))
+            .alert(isPresented: $viewModel.showAlert) {
+                Alert(title: Text("Error"), message: Text(viewModel.alertMessage), dismissButton: .default(Text("OK")))
             }
             // Navigation to set schedule view
-            .navigationDestination(isPresented: $showingSetSchedule) {
-                SetScheduleView(medications: $medications)
+            .navigationDestination(isPresented: $viewModel.showingSetSchedule) {
+                SetScheduleView(medications: $viewModel.medications)
             }
         }
         .padding()
-    }
-
-    // Function to handle alert display
-    private func showAlert(message: String) {
-        alertMessage = message
-        showAlert = true
     }
 }
 
