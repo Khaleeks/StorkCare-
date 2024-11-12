@@ -12,8 +12,7 @@ struct TrackBabyDevelopmentView: View {
     @State private var currentWeek: Int?
     @State private var developmentInfo: BabyDevelopment?
     @State private var errorMessage: String = ""
-    
-    let uid: String // Pass the authenticated user's UID
+    @State private var testUser = testPregnantUser(year: 2024, month: 04, day: 03)
     
     var body: some View {
         VStack(spacing: 20) {
@@ -28,7 +27,7 @@ struct TrackBabyDevelopmentView: View {
             
             
             Button("Calculate Current Week") {
-                fetchDate(documentID: uid)
+                conceptionDate = testUser.getDate()!
                 calculateCurrentWeek()
             }
             .padding()
@@ -62,24 +61,7 @@ struct TrackBabyDevelopmentView: View {
             developmentInfo = nil // Reset if the week is out of bounds
         }
     }
-    
-    private func fetchDate(documentID: String){
-        let db = Firestore.firestore()
-        let docRef = db.collection("PregnantUsers").document(documentID)
-        docRef.getDocument { document, error in
-            if let error = error as NSError?{
-                self.errorMessage = "Error getting document: \(error.localizedDescription)"
-            }
-            else {
-                if let document = document {
-                    _ = document.documentID
-                    let data = document.data()
-                    _ = data?["pregnancyStartDate"] as? Date??
-                }
-            }
-        }
-    }
 }
 #Preview {
-    TrackBabyDevelopmentView(uid: "sampleUID")
+    TrackBabyDevelopmentView()
 }
