@@ -78,7 +78,7 @@ struct ContentView: View {
         case "Medication Reminder":
             SetupMedicationView(medications: $medications) // Use the binding to medications
         case "Provider Availability":
-            ProviderAvailabilityView(uid: "")
+            ProviderAvailabilityView()
         default:
             Text("Unknown use case")
         }

@@ -8,17 +8,14 @@
 import SwiftUI
 import Foundation
 
-class testPregnantUser {
+struct testPregnantUser {
     var pregnancyStartDate: Date = Date()
-    init (year: Int, month: Int, day: Int) {
-        var components = DateComponents()
-        components.year = year
-        components.month = month
-        components.day = day
-        let calendar = Calendar.current
-        self.pregnancyStartDate = calendar.date(from: components)!
+    init(date: Date) {
+        self.pregnancyStartDate = date
     }
     func getDate() -> Date? {
         return self.pregnancyStartDate
     }
 }
+
+
