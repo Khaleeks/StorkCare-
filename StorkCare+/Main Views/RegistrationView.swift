@@ -6,13 +6,15 @@
 //
 
 
-
+// RegistrationView.swift
 import SwiftUI
 
 struct RegistrationView: View {
     @Binding var isAuthenticated: Bool  // Use @Binding to accept a reference
 
     @ObservedObject var viewModel = RegistrationViewModel()
+
+    @State private var pregnantWomanViewModel = PregnantWomanViewModel() // Create a PregnantWomanViewModel for navigation
 
     var body: some View {
         VStack(spacing: 20) {
@@ -61,7 +63,7 @@ struct RegistrationView: View {
             if viewModel.role == "Healthcare Provider" {
                 HealthcarePage(uid: "someUID") // Example UID
             } else if viewModel.role == "Pregnant Woman" {
-                PregnantWomanPage(uid: "someUID") // Example UID
+                PregnantWomanPage(viewModel: pregnantWomanViewModel, uid: "someUID") // Pass viewModel to PregnantWomanPage
             }
         }
     }
