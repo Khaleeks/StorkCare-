@@ -9,33 +9,25 @@
 import SwiftUI
 
 class SetScheduleViewModel: ObservableObject {
-    @Published var scheduleFrequency: String = "Every day"
+    @Published var scheduleFrequency: String = ""
     @Published var specificTimes: [String] = []
     @Published var capsuleQuantity: String = "1 capsule"
     @Published var startDate: Date = Date()
     @Published var endDate: Date = Date()
-    @Published var showSummary = false
-    @Published var showErrorMessage = false // New property for error message
+    @Published var showSummary: Bool = false
+    @Published var showErrorMessage: Bool = false
+    var frequencyOptions: [String] = ["Once a day", "Twice a day", "Every other day"]
 
-    let frequencyOptions = ["Every day", "On a cyclical schedule", "On specific days of the week", "As needed"]
-    
     func addTime(_ time: Date) {
-        specificTimes.append(formattedTime(time))
-        showErrorMessage = false // Hide error when time is added
+        specificTimes.append("\(time)")
     }
 
     func onNextButtonTapped() {
-        // If no time is added, show an error message
+        // Example: if no time is added, show error
         if specificTimes.isEmpty {
             showErrorMessage = true
         } else {
             showSummary = true
         }
-    }
-
-    private func formattedTime(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
     }
 }

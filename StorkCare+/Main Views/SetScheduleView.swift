@@ -83,7 +83,14 @@ struct SetScheduleView: View {
 
             // Navigation to Summary View
             .navigationDestination(isPresented: $viewModel.showSummary) {
-                SummaryView(medications: $medications, scheduleFrequency: viewModel.scheduleFrequency, specificTimes: viewModel.specificTimes, capsuleQuantity: viewModel.capsuleQuantity, startDate: viewModel.startDate, endDate: viewModel.endDate)
+                SummaryView(viewModel: SummaryViewModel(
+                    medications: medications,
+                    scheduleFrequency: viewModel.scheduleFrequency,
+                    specificTimes: viewModel.specificTimes,
+                    capsuleQuantity: viewModel.capsuleQuantity,
+                    startDate: viewModel.startDate,
+                    endDate: viewModel.endDate
+                ))
             }
         }
         .padding()
