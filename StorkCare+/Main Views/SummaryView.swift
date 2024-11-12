@@ -14,17 +14,20 @@ struct SummaryView: View {
 
     var body: some View {
         VStack(spacing: 20) {
-            Text("Summary of Your Medication")
+            Text("Summary of Medication")
                 .font(.title)
+                .bold()
                 .padding()
-
-            Text("Frequency: \(scheduleFrequency)")
-            Text("Times and Quantities:")
+                .frame(maxWidth: .infinity) // Keeps it within screen bounds
+                .multilineTextAlignment(.center) // Center text within the frame
+                .lineLimit(1) // Keeps it on one line
+            Text("Frequency: ").bold() + Text("\(scheduleFrequency)")
+            Text("Times and Quantities:").bold()
             ForEach(specificTimes, id: \.self) { time in
-                Text("\(time): \(capsuleQuantity)")
+                Text("\(time): ").bold() + Text("\(capsuleQuantity)")
             }
-            Text("Start Date: \(formattedDate(startDate))")
-            Text("End Date: \(formattedDate(endDate))")
+            Text("Start Date: ").bold() + Text(formattedDate(startDate))
+            Text("End Date: ").bold() + Text(formattedDate(endDate))
 
             // Done Button to navigate back to ContentView
             Button("Done") {

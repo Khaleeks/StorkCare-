@@ -72,9 +72,9 @@ struct TrackBabyDevelopmentView: View {
             }
             else {
                 if let document = document {
-                    let id = document.documentID
+                    _ = document.documentID
                     let data = document.data()
-                    let conceptionDate = data?["pregnancyStartDate"] as? Date??
+                    _ = data?["pregnancyStartDate"] as? Date??
                 }
             }
         }

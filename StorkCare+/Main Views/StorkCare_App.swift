@@ -7,23 +7,20 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         FirebaseApp.configure()
-        // Configure Firestore settings
+        
         let db = Firestore.firestore()
-        let settings = db.settings
-        settings.isPersistenceEnabled = true
-        settings.cacheSizeBytes = FirestoreCacheSizeUnlimited
-        db.settings = settings
+        
+        // Use PersistentCacheSettings without setting sizeBytes`
+        let cacheSettings = PersistentCacheSettings() // This enables persistence by default
+        db.settings.cacheSettings = cacheSettings // Apply to Firestore settings
         
         return true
     }
 }
-
 @main
 struct StorkCare_App: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     @State private var isAuthenticated = false
-    
-    // Add this to store the auth listener
     @State private var authListener: AuthStateDidChangeListenerHandle?
     
     var body: some Scene {
@@ -42,7 +39,6 @@ struct StorkCare_App: App {
     }
     
     func checkAuthenticationStatus() {
-        // Store the listener handle
         authListener = Auth.auth().addStateDidChangeListener { auth, user in
             if let user = user {
                 print("User is authenticated with UID: \(user.uid)")
@@ -74,7 +70,6 @@ struct StorkCare_App: App {
         }
     }
     
-    // Optional: Remove the listener when appropriate
     func removeAuthListener() {
         if let listener = authListener {
             Auth.auth().removeStateDidChangeListener(listener)
