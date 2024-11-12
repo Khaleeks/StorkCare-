@@ -78,8 +78,9 @@ struct IntroductionPage: View {
     }
 }
 
-#Preview {
-    NavigationStack {
+struct IntroductionPage_Previews: PreviewProvider {
+    static var previews: some View {
+        // Create a state variable for isAuthenticated in the preview
         IntroductionPage(isAuthenticated: .constant(false))
     }
 }

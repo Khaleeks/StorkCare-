@@ -8,26 +8,12 @@
 import SwiftUI
 
 struct PregnantWomanPage: View {
+    @ObservedObject var viewModel: PregnantWomanViewModel
     let uid: String
-    
-    @State private var name: String = ""
-    @State private var selectedSex: String = ""
-    @State private var dateOfBirth: Date = Date()
-    @State private var pregnancyStartDate: Date = Date() // New field for pregnancy start date
-    @State private var selectedHeight: Int = 160 // Default value for height
-    @State private var selectedWeight: Int = 70 // Default value for weight
-    @State private var medicalHistory: String = "" // New field for past medical history
-
-    @State private var showSexPicker = false
-    @State private var showHeightPicker = false
-    @State private var showWeightPicker = false
-    @State private var showDatePicker = false
-    @State private var showPregnancyDatePicker = false // Show picker for pregnancy start date
 
     var body: some View {
         VStack(spacing: 15) {
-            Spacer()
-                .frame(height: 20)
+            Spacer().frame(height: 20)
 
             Text("Personalized Health Data")
                 .font(.largeTitle)
@@ -46,99 +32,97 @@ struct PregnantWomanPage: View {
             Form {
                 Section(header: Text("Personal Info")) {
                     HStack {
-                        Text("Name")
-                            .bold()
+                        Text("Name").bold()
                         Spacer()
-                        TextField("Enter your name", text: $name)
+                        TextField("Enter your name", text: $viewModel.name)
                             .multilineTextAlignment(.trailing)
                     }
 
                     HStack {
-                        Text("Sex")
-                            .bold()
+                        Text("Sex").bold()
                         Spacer()
-                        Text(selectedSex.isEmpty ? "Select" : selectedSex)
+                        Text(viewModel.selectedSex.isEmpty ? "Select" : viewModel.selectedSex)
                             .foregroundColor(.black)
                             .onTapGesture {
-                                showSexPicker.toggle()
+                                viewModel.showSexPicker.toggle()
                             }
                     }
 
                     HStack {
-                        Text("Date of Birth")
-                            .bold()
+                        Text("Date of Birth").bold()
                         Spacer()
-                        Text(dateFormatted(date: dateOfBirth))
+                        Text(viewModel.dateFormatted(date: viewModel.dateOfBirth))
                             .foregroundColor(.black)
                             .onTapGesture {
-                                showDatePicker.toggle()
+                                viewModel.showDatePicker.toggle()
                             }
                     }
                 }
 
                 Section(header: Text("Pregnancy Info")) {
                     HStack {
-                        Text("Pregnancy Start Date")
-                            .bold()
+                        Text("Pregnancy Start Date").bold()
                         Spacer()
-                        Text(dateFormatted(date: pregnancyStartDate))
+                        Text(viewModel.dateFormatted(date: viewModel.pregnancyStartDate))
                             .foregroundColor(.black)
                             .onTapGesture {
-                                showPregnancyDatePicker.toggle()
+                                viewModel.showPregnancyDatePicker.toggle()
                             }
                     }
 
                     VStack(alignment: .leading) {
-                        Text("Past Medical History")
-                            .bold()
-                        TextField("Enter any relevant medical history", text: $medicalHistory)
+                        Text("Past Medical History").bold()
+                        TextField("Enter any relevant medical history", text: $viewModel.medicalHistory)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                     }
                 }
 
                 Section(header: Text("Physical Info")) {
                     HStack {
-                        Text("Height (cm)")
-                            .bold()
+                        Text("Height (cm)").bold()
                         Spacer()
-                        Text("\(selectedHeight) cm")
+                        Text("\(viewModel.selectedHeight) cm")
                             .foregroundColor(.black)
                             .onTapGesture {
-                                showHeightPicker.toggle()
+                                viewModel.showHeightPicker.toggle()
                             }
                     }
 
                     HStack {
-                        Text("Weight (kg)")
-                            .bold()
+                        Text("Weight (kg)").bold()
                         Spacer()
-                        Text("\(selectedWeight) kg")
+                        Text("\(viewModel.selectedWeight) kg")
                             .foregroundColor(.black)
                             .onTapGesture {
-                                showWeightPicker.toggle()
+                                viewModel.showWeightPicker.toggle()
                             }
                     }
                 }
             }
             .padding()
 
-            NavigationLink(destination: ContentView()) {
-                Text("Continue")
-                    .bold()
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.pink)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                    .padding(.horizontal)
+            Button("Continue") {
+                viewModel.savePregnantWomanData(uid: uid)
             }
+            .bold()
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(Color.pink)
+            .foregroundColor(.white)
+            .cornerRadius(10)
+            .padding(.horizontal)
+
         }
+        .navigationDestination(isPresented: $viewModel.isProfileCreated) {
+            ContentView() // Navigate to main features page
+        }
+
         .padding()
-        
+
         // Sex Picker Bottom Sheet
-        .sheet(isPresented: $showSexPicker) {
+        .sheet(isPresented: $viewModel.showSexPicker) {
             VStack {
-                Picker("Sex", selection: $selectedSex) {
+                Picker("Sex", selection: $viewModel.selectedSex) {
                     Text("Male").tag("Male")
                     Text("Female").tag("Female")
                     Text("Nonbinary").tag("Nonbinary")
@@ -146,7 +130,7 @@ struct PregnantWomanPage: View {
                 .pickerStyle(.wheel)
 
                 Button(action: {
-                    showSexPicker = false
+                    viewModel.showSexPicker = false
                 }) {
                     Text("Done")
                         .bold()
@@ -160,11 +144,11 @@ struct PregnantWomanPage: View {
             }
             .padding()
         }
-        
+
         // Height Picker Bottom Sheet
-        .sheet(isPresented: $showHeightPicker) {
+        .sheet(isPresented: $viewModel.showHeightPicker) {
             VStack {
-                Picker("Height", selection: $selectedHeight) {
+                Picker("Height", selection: $viewModel.selectedHeight) {
                     ForEach(30...275, id: \.self) { height in
                         Text("\(height) cm").tag(height)
                     }
@@ -172,7 +156,7 @@ struct PregnantWomanPage: View {
                 .pickerStyle(.wheel)
 
                 Button(action: {
-                    showHeightPicker = false
+                    viewModel.showHeightPicker = false
                 }) {
                     Text("Done")
                         .bold()
@@ -186,11 +170,11 @@ struct PregnantWomanPage: View {
             }
             .padding()
         }
-        
+
         // Weight Picker Bottom Sheet
-        .sheet(isPresented: $showWeightPicker) {
+        .sheet(isPresented: $viewModel.showWeightPicker) {
             VStack {
-                Picker("Weight", selection: $selectedWeight) {
+                Picker("Weight", selection: $viewModel.selectedWeight) {
                     ForEach(0...454, id: \.self) { weight in
                         Text("\(weight) kg").tag(weight)
                     }
@@ -198,7 +182,7 @@ struct PregnantWomanPage: View {
                 .pickerStyle(.wheel)
 
                 Button(action: {
-                    showWeightPicker = false
+                    viewModel.showWeightPicker = false
                 }) {
                     Text("Done")
                         .bold()
@@ -214,15 +198,15 @@ struct PregnantWomanPage: View {
         }
 
         // Date Picker Bottom Sheet for Date of Birth
-        .sheet(isPresented: $showDatePicker) {
+        .sheet(isPresented: $viewModel.showDatePicker) {
             VStack {
-                DatePicker("Select your date of birth", selection: $dateOfBirth, displayedComponents: .date)
+                DatePicker("Select your date of birth", selection: $viewModel.dateOfBirth, displayedComponents: .date)
                     .datePickerStyle(.graphical)
                     .frame(maxWidth: .infinity)
                     .padding()
 
                 Button(action: {
-                    showDatePicker = false
+                    viewModel.showDatePicker = false
                 }) {
                     Text("Done")
                         .bold()
@@ -240,15 +224,15 @@ struct PregnantWomanPage: View {
         }
 
         // Date Picker Bottom Sheet for Pregnancy Start Date
-        .sheet(isPresented: $showPregnancyDatePicker) {
+        .sheet(isPresented: $viewModel.showPregnancyDatePicker) {
             VStack {
-                DatePicker("Select pregnancy start date", selection: $pregnancyStartDate, displayedComponents: .date)
+                DatePicker("Select pregnancy start date", selection: $viewModel.pregnancyStartDate, displayedComponents: .date)
                     .datePickerStyle(.graphical)
                     .frame(maxWidth: .infinity)
                     .padding()
 
                 Button(action: {
-                    showPregnancyDatePicker = false
+                    viewModel.showPregnancyDatePicker = false
                 }) {
                     Text("Done")
                         .bold()
@@ -265,16 +249,10 @@ struct PregnantWomanPage: View {
             .edgesIgnoringSafeArea(.all)
         }
     }
+}
 
-    // Helper function to format date for display
-    private func dateFormatted(date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        return formatter.string(from: date)
+struct PregnantWomanPage_Previews: PreviewProvider {
+    static var previews: some View {
+        PregnantWomanPage(viewModel: PregnantWomanViewModel(), uid: "sampleUID")
     }
 }
-
-#Preview {
-    PregnantWomanPage(uid: "sampleUID")
-}
-

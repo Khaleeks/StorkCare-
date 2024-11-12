@@ -1,65 +1,64 @@
+//
+//  SetScheduleViewModel.swift
+//  StorkCare+
+//
+//  Created by Khaleeqa Garrett on 12/11/24.
+//
+
 import SwiftUI
 
 struct SummaryView: View {
-    @Binding var medications: [Medication]
-    var scheduleFrequency: String
-    var specificTimes: [String]
-    var capsuleQuantity: String
-    var startDate: Date
-    var endDate: Date
-
-    @State private var showingContentView = false // State to control navigation to ContentView
-    @State private var showConfirmation = false // State to show confirmation message
-    @Environment(\.presentationMode) var presentationMode // To handle navigation
+    @StateObject var viewModel: SummaryViewModel
 
     var body: some View {
         VStack(spacing: 20) {
-            Text("Summary of Your Medication")
+            Text("Summary")
                 .font(.title)
                 .padding()
 
-            Text("Frequency: \(scheduleFrequency)")
-            Text("Times and Quantities:")
-            ForEach(specificTimes, id: \.self) { time in
-                Text("\(time): \(capsuleQuantity)")
-            }
-            Text("Start Date: \(formattedDate(startDate))")
-            Text("End Date: \(formattedDate(endDate))")
+            // Medication Schedule Section
+            Text("Schedule Frequency: \(viewModel.scheduleFrequency)")
+                .font(.headline)
+            Text("Capsule Quantity: \(viewModel.capsuleQuantity)")
 
-            // Done Button to navigate back to ContentView
+            // Specific Times Section
+            Text("At What Times?")
+                .font(.headline)
+            ForEach(viewModel.specificTimes, id: \.self) { time in
+                Text(time)
+            }
+
+            // Duration Section
+            Text("Duration: \(formattedDate(viewModel.startDate)) to \(formattedDate(viewModel.endDate))")
+                .font(.headline)
+
+            // Done Button
             Button("Done") {
-                showConfirmation = true // Show confirmation message
+                // Logic to dismiss or navigate away from the summary screen
             }
             .padding()
             .background(Color.green)
             .foregroundColor(.white)
             .cornerRadius(10)
-            .alert(isPresented: $showConfirmation) {
-                Alert(
-                    title: Text("Confirmation"),
-                    message: Text("You will be reminded 10 minutes before your scheduled time."),
-                    primaryButton: .default(Text("OK"), action: {
-                        // After confirmation, navigate back to ContentView
-                        showingContentView = true
-                    }),
-                    secondaryButton: .cancel(Text("Cancel"))
-                )
-            }
         }
         .padding()
-        .navigationDestination(isPresented: $showingContentView) {
-            ContentView() // Navigate to ContentView
-        }
     }
 
+    // Helper function to format the dates
     private func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        return formatter.string(from: date)
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .medium
+        return dateFormatter.string(from: date)
     }
 }
 
-// Previews
 #Preview {
-    SummaryView(medications: .constant([]), scheduleFrequency: "Every day", specificTimes: ["5 AM", "12 PM"], capsuleQuantity: "1 capsule", startDate: Date(), endDate: Date())
+    SummaryView(viewModel: SummaryViewModel(
+        medications: [],
+        scheduleFrequency: "Once a day",
+        specificTimes: ["8:00 AM", "8:00 PM"],
+        capsuleQuantity: "1 capsule",
+        startDate: Date(),
+        endDate: Date()
+    ))
 }
