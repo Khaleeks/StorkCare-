@@ -45,6 +45,18 @@ final class TrackBabyDevelopmentViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.currentWeek, 20, "Expected current week to be 20 for a conception date 20 weeks ago.")
         XCTAssertNotNil(viewModel.developmentInfo, "Expected development info for the 20th week.")
         
+        // Boundary Value Testing with conception date 1 week ago.
+        viewModel.conceptionDate = Calendar.current.date(byAdding: .weekOfYear, value: -1, to: Date())!
+        viewModel.calculateCurrentWeek()
+        XCTAssertEqual(viewModel.currentWeek, 1, "Expected current week to be 1 for a conception date 1 week ago.")
+        XCTAssertNotNil(viewModel.developmentInfo, "Expected development info for the 1st week.")
+        
+        // Boundary Value Testing with conception date 40 weeks ago.
+        viewModel.conceptionDate = Calendar.current.date(byAdding: .weekOfYear, value: -40, to: Date())!
+        viewModel.calculateCurrentWeek()
+        XCTAssertEqual(viewModel.currentWeek, 40, "Expected current week to be 40 for a conception date 40 week ago.")
+        XCTAssertNotNil(viewModel.developmentInfo, "Expected development info for the 40th week.")
+        
         // Set an out-of-bounds conception date (e.g., 45 weeks ago)
         viewModel.conceptionDate = Calendar.current.date(byAdding: .weekOfYear, value: -45, to: Date())!
         viewModel.calculateCurrentWeek()
