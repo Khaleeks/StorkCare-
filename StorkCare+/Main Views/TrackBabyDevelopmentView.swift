@@ -59,3 +59,6 @@ struct TrackBabyDevelopmentView: View {
         .padding()
     }
 }
+#Preview {
+        TrackBabyDevelopmentView()
+    }
