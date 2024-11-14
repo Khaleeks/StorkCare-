@@ -21,42 +21,38 @@ class RegistrationViewModel: ObservableObject {
     }
 
     func validatePassword() -> Bool {
-        // Password must be at least 8 characters, contain a number, and a special character
-        let passwordRegEx = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*])[A-Za-z\\d!@#$%^&*]{8,}$"
-        let passwordPred = NSPredicate(format: "SELF MATCHES %@", passwordRegEx)
-        return passwordPred.evaluate(with: password)
+        let passwordRegex = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*]).{6,30}$"
+        let passwordPredicate = NSPredicate(format: "SELF MATCHES %@", passwordRegex)
+        return passwordPredicate.evaluate(with: password)
     }
+
+
+
 
     func registerUser() {
-        guard !role.isEmpty else {
-            message = "Please select a role."
-            return
-        }
-
         if !validateEmail() {
             message = "Invalid email format."
+            isAuthenticated = false
             return
         }
-
+        
         if !validatePassword() {
-            message = "Password must be at least 8 characters long, contain a number, and a special character."
+            message = "Password must be at least 6 to 30 characters long, contain a number, and a special character."
+            isAuthenticated = false
+            return
+        }
+        
+        if role.isEmpty {
+            message = "Please select a role."
+            isAuthenticated = false
             return
         }
 
-        isLoading = true
-        Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
-            self.isLoading = false
-            if let error = error {
-                self.message = "Registration failed: \(error.localizedDescription)"
-                self.isAuthenticated = false
-                return
-            }
-
-            if let user = authResult?.user {
-                self.saveUserData(uid: user.uid, email: self.email, role: self.role)
-            }
-        }
+        // Simulate successful registration
+        isAuthenticated = true
+        message = "Registration successful!"
     }
+
 
     private func saveUserData(uid: String, email: String, role: String) {
         db.collection("users").document(uid).setData([

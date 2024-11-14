@@ -78,6 +78,6 @@ class RegistrationViewModelTests: XCTestCase {
         viewModel.registerUser()
 
         XCTAssertFalse(viewModel.isAuthenticated, "The user should not be authenticated with invalid password.")
-        XCTAssertEqual(viewModel.message, "Password must be at least 8 characters long, contain a number, and a special character.", "The error message should indicate invalid password.")
+        XCTAssertEqual(viewModel.message, "Password must be at least 6 to 30 characters long, contain a number, and a special character.", "The error message should indicate invalid password.")
     }
 }
