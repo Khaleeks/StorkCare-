@@ -5,6 +5,7 @@ struct SetScheduleView: View {
     @ObservedObject var viewModel: SetScheduleViewModel // Use the ViewModel
     
     let frequencyOptions = ["Once a day", "Twice a day", "Every other day"]
+    @State private var navigateToSummary = false // State for navigation
 
     var body: some View {
         NavigationStack {
@@ -75,6 +76,7 @@ struct SetScheduleView: View {
                 // Next Button to Summary
                 Button("Next") {
                     viewModel.onNextButtonTapped()
+                    navigateToSummary = true
                 }
                 .padding()
                 .background(viewModel.showErrorMessage ? Color.red : Color.green)
@@ -89,12 +91,9 @@ struct SetScheduleView: View {
                         .padding()
                 }
 
-                // NavigationLink using navigationDestination
-                NavigationLink(value: "summary") {
-                    EmptyView() // We don't need to display anything, just navigate when active
-                }
-                .navigationDestination(for: String.self) { _ in
-                    SummaryView(
+                // NavigationLink using isActive
+                NavigationLink(
+                    destination: SummaryView(
                         medications: $medications,  // Pass Binding for medications
                         viewModel: SummaryViewModel(
                             medications: $medications, // Pass Binding to the ViewModel
@@ -104,7 +103,10 @@ struct SetScheduleView: View {
                             startDate: viewModel.startDate,
                             endDate: viewModel.endDate
                         )
-                    )
+                    ),
+                    isActive: $navigateToSummary
+                ) {
+                    EmptyView()
                 }
             }
             .padding()
