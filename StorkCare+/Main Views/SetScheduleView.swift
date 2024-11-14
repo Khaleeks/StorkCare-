@@ -1,102 +1,117 @@
-//
-//  SetScheduleView.swift
-//  StorkCare+
-//
-//  Created by Khaleeqa Garrett on 10/25/24.
-//  Updated on 11/11/24.
-
 import SwiftUI
 
 struct SetScheduleView: View {
-    @Binding var medications: [Medication]
-    @StateObject private var viewModel = SetScheduleViewModel()
+    @Binding var medications: [Medication] // Binding to medication list
+    @ObservedObject var viewModel: SetScheduleViewModel // Use the ViewModel
+    
+    let frequencyOptions = ["Once a day", "Twice a day", "Every other day"]
 
     var body: some View {
-        VStack(spacing: 20) {
-            Text("Set a Schedule")
-                .font(.title)
-                .padding()
+        NavigationStack {
+            VStack(spacing: 20) {
+                Text("Set a Schedule")
+                    .font(.title)
+                    .padding()
 
-            // Frequency Section
-            Text("When Will You Take This?")
-                .font(.headline)
-            Picker("Change Frequency", selection: $viewModel.scheduleFrequency) {
-                ForEach(viewModel.frequencyOptions, id: \.self) { option in
-                    Text(option)
-                }
-            }
-            .pickerStyle(MenuPickerStyle())
-            .padding()
-
-            // Time Section
-            Text("At What Time?")
-                .font(.headline)
-            VStack(alignment: .leading) {
-                ForEach(viewModel.specificTimes, id: \.self) { time in
-                    HStack {
-                        Text(time)
-                        Spacer()
-                        Text(viewModel.capsuleQuantity)
+                Group {
+                    // Frequency Section
+                    Text("When Will You Take This?")
+                        .font(.headline)
+                    Picker("Change Frequency", selection: $viewModel.scheduleFrequency) {
+                        ForEach(viewModel.frequencyOptions, id: \.self) { option in
+                            Text(option)
+                        }
                     }
-                    .padding(.vertical, 2)
+                    .pickerStyle(MenuPickerStyle())
+                    .padding()
+
+                    // Time Section
+                    Text("At What Time?")
+                        .font(.headline)
+                    VStack(alignment: .leading) {
+                        ForEach(viewModel.specificTimes, id: \.self) { time in
+                            HStack {
+                                Text(time) // Display formatted time string
+                                Spacer()
+                                Text(viewModel.capsuleQuantity)
+                            }
+                            .padding(.vertical, 2)
+                        }
+                        Button("Add Time") {
+                            viewModel.isAddingTime.toggle()
+                        }
+                    }
+                    .padding()
+                    .sheet(isPresented: $viewModel.isAddingTime) {
+                        VStack {
+                            DatePicker("Select Time", selection: $viewModel.newTime, displayedComponents: .hourAndMinute)
+                                .datePickerStyle(WheelDatePickerStyle())
+                            Button("Done") {
+                                viewModel.addTime(viewModel.newTime)
+                                viewModel.isAddingTime = false
+                            }
+                            .padding()
+                        }
+                    }
+
+                    // Duration Section
+                    Text("Duration")
+                        .font(.headline)
+                    HStack {
+                        VStack {
+                            Text("Start Date")
+                            DatePicker("Start Date", selection: $viewModel.startDate, displayedComponents: .date)
+                                .labelsHidden()
+                        }
+                        VStack {
+                            Text("End Date")
+                            DatePicker("End Date", selection: $viewModel.endDate, displayedComponents: .date)
+                                .labelsHidden()
+                        }
+                    }
+                    .padding()
                 }
-                Button("Add Time") {
-                    // Simulate adding time
-                    let newTime = Date() // Replace with DatePicker input in real implementation
-                    viewModel.addTime(newTime)
+
+                // Next Button to Summary
+                Button("Next") {
+                    viewModel.onNextButtonTapped()
+                }
+                .padding()
+                .background(viewModel.showErrorMessage ? Color.red : Color.green)
+                .foregroundColor(.white)
+                .cornerRadius(10)
+                .disabled(viewModel.specificTimes.isEmpty) // Disable button if no time is added
+
+                // Show error message
+                if viewModel.showErrorMessage {
+                    Text("Please make sure all fields are filled correctly.")
+                        .foregroundColor(.red)
+                        .padding()
+                }
+
+                // NavigationLink using navigationDestination
+                NavigationLink(value: "summary") {
+                    EmptyView() // We don't need to display anything, just navigate when active
+                }
+                .navigationDestination(for: String.self) { _ in
+                    SummaryView(
+                        medications: $medications,  // Pass Binding for medications
+                        viewModel: SummaryViewModel(
+                            medications: $medications, // Pass Binding to the ViewModel
+                            scheduleFrequency: viewModel.scheduleFrequency,
+                            specificTimes: viewModel.specificTimes,
+                            capsuleQuantity: viewModel.capsuleQuantity,
+                            startDate: viewModel.startDate,
+                            endDate: viewModel.endDate
+                        )
+                    )
                 }
             }
             .padding()
-
-            // Show error message if no time is added
-            if viewModel.showErrorMessage {
-                Text("Please add at least one time.")
-                    .foregroundColor(.red)
-                    .padding(.top, 10)
-            }
-
-            // Duration Section
-            Text("Duration")
-                .font(.headline)
-            HStack {
-                VStack {
-                    Text("Start Date")
-                    DatePicker("Start Date", selection: $viewModel.startDate, displayedComponents: .date)
-                        .labelsHidden()
-                }
-                VStack {
-                    Text("End Date")
-                    DatePicker("End Date", selection: $viewModel.endDate, displayedComponents: .date)
-                        .labelsHidden()
-                }
-            }
-            .padding()
-
-            // Next Button
-            Button("Next") {
-                viewModel.onNextButtonTapped()
-            }
-            .padding()
-            .background(Color.green)
-            .foregroundColor(.white)
-            .cornerRadius(10)
-
-            // Navigation to Summary View
-            .navigationDestination(isPresented: $viewModel.showSummary) {
-                SummaryView(viewModel: SummaryViewModel(
-                    medications: medications,
-                    scheduleFrequency: viewModel.scheduleFrequency,
-                    specificTimes: viewModel.specificTimes,
-                    capsuleQuantity: viewModel.capsuleQuantity,
-                    startDate: viewModel.startDate,
-                    endDate: viewModel.endDate
-                ))
-            }
         }
-        .padding()
     }
 }
 
 #Preview {
-    SetScheduleView(medications: .constant([]))
+    SetScheduleView(medications: .constant([]), viewModel: SetScheduleViewModel()) // Preview with empty medication list and ViewModel
 }

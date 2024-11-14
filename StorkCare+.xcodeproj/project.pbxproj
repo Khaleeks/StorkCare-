@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		64B3535A2CDC9161004CC609 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 64B353592CDC9161004CC609 /* FirebaseAuth */; };
 		64B3535C2CDC9161004CC609 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 64B3535B2CDC9161004CC609 /* FirebaseFirestore */; };
+		AF7B4C2D2CE5BABF0031860D /* ViewInspector in Frameworks */ = {isa = PBXBuildFile; productRef = AF7B4C2C2CE5BABF0031860D /* ViewInspector */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -66,6 +67,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AF7B4C2D2CE5BABF0031860D /* ViewInspector in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -79,12 +81,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		AF7B4C2B2CE5BABF0031860D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		AFADD64C2CC904D500F68C89 = {
 			isa = PBXGroup;
 			children = (
 				AFADD6572CC904D500F68C89 /* StorkCare+ */,
 				AFADD66A2CC904D800F68C89 /* StorkCare+Tests */,
 				AFADD6742CC904D800F68C89 /* StorkCare+UITests */,
+				AF7B4C2B2CE5BABF0031860D /* Frameworks */,
 				AFADD6562CC904D500F68C89 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -144,6 +154,7 @@
 			);
 			name = "StorkCare+Tests";
 			packageProductDependencies = (
+				AF7B4C2C2CE5BABF0031860D /* ViewInspector */,
 			);
 			productName = "StorkCare+Tests";
 			productReference = AFADD6672CC904D800F68C89 /* StorkCare+Tests.xctest */;
@@ -207,6 +218,7 @@
 			packageReferences = (
 				AFA16B262CD2594900BC8383 /* XCRemoteSwiftPackageReference "SQLite" */,
 				64B353582CDC9161004CC609 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				AF7B4C2A2CE5B7BE0031860D /* XCRemoteSwiftPackageReference "ViewInspector" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AFADD6562CC904D500F68C89 /* Products */;
@@ -575,6 +587,14 @@
 				minimumVersion = 11.4.0;
 			};
 		};
+		AF7B4C2A2CE5B7BE0031860D /* XCRemoteSwiftPackageReference "ViewInspector" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/nalexn/ViewInspector.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.10.0;
+			};
+		};
 		AFA16B262CD2594900BC8383 /* XCRemoteSwiftPackageReference "SQLite" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/stephencelis/SQLite.swift";
@@ -595,6 +615,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 64B353582CDC9161004CC609 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFirestore;
+		};
+		AF7B4C2C2CE5BABF0031860D /* ViewInspector */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AF7B4C2A2CE5B7BE0031860D /* XCRemoteSwiftPackageReference "ViewInspector" */;
+			productName = ViewInspector;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

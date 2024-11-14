@@ -23,20 +23,30 @@ class PregnantWomanViewModel: ObservableObject {
     @Published var showDatePicker: Bool = false
     @Published var showPregnancyDatePicker: Bool = false
     @Published var isProfileCreated: Bool = false
-    
+
     func savePregnantWomanData(uid: String) {
-        // Simulate saving data and changing state
         if name.isEmpty || selectedSex.isEmpty || selectedHeight == 0 || selectedWeight == 0 {
-            // Simulating incomplete data
             isProfileCreated = false
         } else {
             isProfileCreated = true
         }
     }
-    
+
     func dateFormatted(date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateStyle = .long
         return formatter.string(from: date)
+    }
+
+    // Add the resetFields method to clear all fields
+    func resetFields() {
+        name = ""
+        selectedSex = ""
+        dateOfBirth = Date()
+        pregnancyStartDate = Date()
+        medicalHistory = ""
+        selectedHeight = 0
+        selectedWeight = 0
+        isProfileCreated = false
     }
 }

@@ -5,10 +5,10 @@ struct AddMedicationView: View {
     @StateObject private var viewModel: AddMedicationViewModel
 
     // Initialize the view model with medications
-       init(medications: Binding<[Medication]>) {
-           _medications = medications
-           _viewModel = StateObject(wrappedValue: AddMedicationViewModel(medications: medications.wrappedValue))
-       }
+    init(medications: Binding<[Medication]>) {
+        _medications = medications
+        _viewModel = StateObject(wrappedValue: AddMedicationViewModel(medications: medications.wrappedValue))
+    }
     
     var body: some View {
         VStack(spacing: 20) {
@@ -55,7 +55,7 @@ struct AddMedicationView: View {
             }
             // Navigation to set schedule view
             .navigationDestination(isPresented: $viewModel.showingSetSchedule) {
-                SetScheduleView(medications: $viewModel.medications)
+                SetScheduleView(medications: $medications, viewModel: SetScheduleViewModel()) // Pass medications and viewModel to SetScheduleView
             }
         }
         .padding()
