@@ -91,10 +91,10 @@ struct SetScheduleView: View {
                         .padding()
                 }
 
-                // NavigationLink using isActive
-                NavigationLink(
-                    destination: SummaryView(
-                        medications: $medications,  // Pass Binding for medications
+                // Use NavigationLink to navigate to SummaryView
+                if navigateToSummary {
+                    NavigationLink(destination: SummaryView(
+                        medications: $medications,
                         viewModel: SummaryViewModel(
                             medications: $medications, // Pass Binding to the ViewModel
                             scheduleFrequency: viewModel.scheduleFrequency,
@@ -103,10 +103,10 @@ struct SetScheduleView: View {
                             startDate: viewModel.startDate,
                             endDate: viewModel.endDate
                         )
-                    ),
-                    isActive: $navigateToSummary
-                ) {
-                    EmptyView()
+                    )) {
+                        EmptyView()
+                    }
+                    .hidden() // Hide the link, we are just using it for navigation purpose
                 }
             }
             .padding()

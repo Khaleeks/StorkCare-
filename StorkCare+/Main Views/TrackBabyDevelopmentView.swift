@@ -6,7 +6,7 @@ struct TrackBabyDevelopmentView: View {
     var body: some View {
         VStack(spacing: 20) {
             // Conditionally change the title based on whether the progress bar is displayed
-            if viewModel.hasEntry, let currentWeek = viewModel.currentWeek {
+            if viewModel.hasEntry, let _ = viewModel.currentWeek {
                 Text("Your Baby Is In...")
                     .font(.title)
                     .bold()
@@ -103,7 +103,7 @@ struct TrackBabyDevelopmentView: View {
             }
 
             // Display development info for the current week
-            if let week = viewModel.currentWeek, let info = viewModel.developmentInfo {
+            if let _ = viewModel.currentWeek, let info = viewModel.developmentInfo {
                 Text("Size: \(info.size)")
                 Text("Development: \(info.description)")
                     .multilineTextAlignment(.center)

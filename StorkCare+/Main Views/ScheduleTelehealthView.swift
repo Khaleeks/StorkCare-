@@ -7,8 +7,7 @@ import FirebaseFirestore
 
 // ScheduleTelehealthView.swift
 struct ScheduleTelehealthView: View {
-    @StateObject private var viewModel = ScheduleTelehealthViewModel()
-    
+    @StateObject var viewModel = ScheduleTelehealthViewModel()
     var body: some View {
         VStack(spacing: 20) {
             Text("Schedule a Telehealth Consultation")
@@ -35,10 +34,10 @@ struct ScheduleTelehealthView: View {
             .padding()
             .background(RoundedRectangle(cornerRadius: 10).fill(Color.white))
             .cornerRadius(10)
-            .onChange(of: viewModel.selectedProvider) { provider in
-                viewModel.loadAvailableSlots(for: provider)
+            .onChange(of: viewModel.selectedProvider) { newProvider in
+                viewModel.loadAvailableSlots(for: newProvider)
             }
-            
+
             if viewModel.providerUnavailable {
                 Text("This provider is currently unavailable.")
                     .foregroundColor(.red)
