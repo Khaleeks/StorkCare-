@@ -49,6 +49,7 @@ class HealthcarePageViewModelTests: XCTestCase {
 
     // 2. Test: Verify that saveHealthcareProviderData handles success correctly
     func testSaveHealthcareProviderDataSuccess() {
+        let expectation = self.expectation(description: "Async call for saveHealthcareProviderData success")
         // Given
         viewModel.gender = "Female"
         viewModel.occupation = "Doctor"
@@ -59,6 +60,14 @@ class HealthcarePageViewModelTests: XCTestCase {
 
         // When
         viewModel.saveHealthcareProviderData(uid: "testUID")
+        expectation.fulfill()
+        waitForExpectations(timeout: 2, handler: nil)
+        expectation.fulfill()
+        waitForExpectations(timeout: 2, handler: nil)
+        expectation.fulfill()
+        waitForExpectations(timeout: 2, handler: nil)
+        expectation.fulfill()
+        waitForExpectations(timeout: 2, handler: nil)
 
         // Then
         XCTAssertEqual(viewModel.message, "Onboarding complete!")
@@ -67,6 +76,7 @@ class HealthcarePageViewModelTests: XCTestCase {
 
     // 3. Test: Verify that saveHealthcareProviderData handles failure correctly
     func testSaveHealthcareProviderDataFailure() {
+        let expectation = self.expectation(description: "Async call for saveHealthcareProviderData failure")
         // Given
         viewModel.gender = "Male"
         viewModel.occupation = "Nurse"
@@ -78,6 +88,14 @@ class HealthcarePageViewModelTests: XCTestCase {
 
         // When
         viewModel.saveHealthcareProviderData(uid: "testUID")
+        expectation.fulfill()
+        waitForExpectations(timeout: 2, handler: nil)
+        expectation.fulfill()
+        waitForExpectations(timeout: 2, handler: nil)
+        expectation.fulfill()
+        waitForExpectations(timeout: 2, handler: nil)
+        expectation.fulfill()
+        waitForExpectations(timeout: 2, handler: nil)
 
         // Then
         XCTAssertEqual(viewModel.message, "Failed to save data: Network error")
@@ -86,6 +104,7 @@ class HealthcarePageViewModelTests: XCTestCase {
 
     // 4. Test: Check saveHealthcareProviderData when some fields are empty
     func testSaveHealthcareProviderDataWithEmptyFields() {
+        let expectation = self.expectation(description: "Async call for saveHealthcareProviderData with empty fields")
         // Given
         viewModel.gender = "" // Empty gender
         viewModel.occupation = "Doctor" // Occupation filled
@@ -96,6 +115,14 @@ class HealthcarePageViewModelTests: XCTestCase {
 
         // When
         viewModel.saveHealthcareProviderData(uid: "testUID")
+        expectation.fulfill()
+        waitForExpectations(timeout: 2, handler: nil)
+        expectation.fulfill()
+        waitForExpectations(timeout: 2, handler: nil)
+        expectation.fulfill()
+        waitForExpectations(timeout: 2, handler: nil)
+        expectation.fulfill()
+        waitForExpectations(timeout: 2, handler: nil)
 
         // Then
         XCTAssertEqual(viewModel.message, "Onboarding complete!")
@@ -104,6 +131,7 @@ class HealthcarePageViewModelTests: XCTestCase {
 
     // 5. Test: Verify saveHealthcareProviderData with invalid UID (error case)
     func testSaveHealthcareProviderDataWithInvalidUID() {
+        let expectation = self.expectation(description: "Async call for saveHealthcareProviderData with invalid UID")
         // Given
         viewModel.gender = "Female"
         viewModel.occupation = "Doctor"
@@ -115,6 +143,8 @@ class HealthcarePageViewModelTests: XCTestCase {
 
         // When
         viewModel.saveHealthcareProviderData(uid: "invalidUID")
+        expectation.fulfill()
+        waitForExpectations(timeout: 2, handler: nil)
 
         // Then
         XCTAssertEqual(viewModel.message, "Failed to save data: Invalid user ID")
@@ -123,6 +153,7 @@ class HealthcarePageViewModelTests: XCTestCase {
 
     // 6. Test: Verify saveHealthcareProviderData works with different user data
     func testSaveHealthcareProviderDataWithDifferentUserData() {
+        let expectation = self.expectation(description: "Async call for saveHealthcareProviderData with different user data")
         // Given
         viewModel.gender = "Nonbinary"
         viewModel.occupation = "Midwife"
@@ -133,6 +164,14 @@ class HealthcarePageViewModelTests: XCTestCase {
 
         // When
         viewModel.saveHealthcareProviderData(uid: "testUID")
+        expectation.fulfill()
+        waitForExpectations(timeout: 2, handler: nil)
+        expectation.fulfill()
+        waitForExpectations(timeout: 2, handler: nil)
+        expectation.fulfill()
+        waitForExpectations(timeout: 2, handler: nil)
+        expectation.fulfill()
+        waitForExpectations(timeout: 2, handler: nil)
 
         // Then
         XCTAssertEqual(viewModel.message, "Onboarding complete!")

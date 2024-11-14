@@ -1,9 +1,3 @@
-//
-//  HealthcarePageViewModel.swift
-//  StorkCare+
-//
-//  Created by Khaleeqa Garrett on 11/13/24.
-//
 import Foundation
 import FirebaseFirestore
 
@@ -58,5 +52,7 @@ class HealthcarePageViewModel: ObservableObject {
             }
         }
     }
-}
 
+    
+    
+}
