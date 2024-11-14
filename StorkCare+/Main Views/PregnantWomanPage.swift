@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-
 struct PregnantWomanPage: View {
     @ObservedObject var viewModel: PregnantWomanViewModel
     let uid: String
@@ -36,6 +35,7 @@ struct PregnantWomanPage: View {
                         Spacer()
                         TextField("Enter your name", text: $viewModel.name)
                             .multilineTextAlignment(.trailing)
+                            .tag(1) // Add tag to the name TextField for testing
                     }
 
                     HStack {
@@ -86,6 +86,7 @@ struct PregnantWomanPage: View {
                             .onTapGesture {
                                 viewModel.showHeightPicker.toggle()
                             }
+                            .tag(2) // Tag for height picker toggle button
                     }
 
                     HStack {
@@ -116,7 +117,6 @@ struct PregnantWomanPage: View {
         .navigationDestination(isPresented: $viewModel.isProfileCreated) {
             ContentView() // Navigate to main features page
         }
-
         .padding()
 
         // Sex Picker Bottom Sheet
@@ -154,6 +154,7 @@ struct PregnantWomanPage: View {
                     }
                 }
                 .pickerStyle(.wheel)
+                .tag(3) // Tag for height picker sheet
 
                 Button(action: {
                     viewModel.showHeightPicker = false

@@ -1,11 +1,3 @@
-//
-//  SetScheduleViewModel.swift
-//  StorkCare+
-//
-//  Created by Khaleeqa Garrett on 11/11/24.
-//
-
-
 import SwiftUI
 
 class SetScheduleViewModel: ObservableObject {
@@ -16,10 +8,22 @@ class SetScheduleViewModel: ObservableObject {
     @Published var endDate: Date = Date()
     @Published var showSummary: Bool = false
     @Published var showErrorMessage: Bool = false
+    @Published var isAddingTime: Bool = false
+    @Published var newTime: Date = Date() // Assuming newTime is a Date object for new time selection
+    
     var frequencyOptions: [String] = ["Once a day", "Twice a day", "Every other day"]
+    
+    // Initialize DateFormatter
+    let timeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "hh:mm a" // Customize the format as per your requirement
+        return formatter
+    }()
 
     func addTime(_ time: Date) {
-        specificTimes.append("\(time)")
+        // Format the time and append to specificTimes
+        let formattedTime = timeFormatter.string(from: time)
+        specificTimes.append(formattedTime)
     }
 
     func onNextButtonTapped() {

@@ -9,15 +9,15 @@
 import SwiftUI
 
 class SummaryViewModel: ObservableObject {
-    @Published var medications: [Medication]
-    @Published var scheduleFrequency: String
-    @Published var specificTimes: [String]
-    @Published var capsuleQuantity: String
-    @Published var startDate: Date
-    @Published var endDate: Date
+    @Binding var medications: [Medication]
+    var scheduleFrequency: String
+    var specificTimes: [String]
+    var capsuleQuantity: String
+    var startDate: Date
+    var endDate: Date
 
-    init(medications: [Medication], scheduleFrequency: String, specificTimes: [String], capsuleQuantity: String, startDate: Date, endDate: Date) {
-        self.medications = medications
+    init(medications: Binding<[Medication]>, scheduleFrequency: String, specificTimes: [String], capsuleQuantity: String, startDate: Date, endDate: Date) {
+        self._medications = medications
         self.scheduleFrequency = scheduleFrequency
         self.specificTimes = specificTimes
         self.capsuleQuantity = capsuleQuantity
