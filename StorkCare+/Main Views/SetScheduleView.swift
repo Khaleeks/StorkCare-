@@ -1,11 +1,10 @@
 import SwiftUI
 
 struct SetScheduleView: View {
-    @Binding var medications: [Medication] // Binding to medication list
-    @ObservedObject var viewModel: SetScheduleViewModel // Use the ViewModel
-    
-    let frequencyOptions = ["Once a day", "Twice a day", "Every other day"]
-    @State private var navigateToSummary = false // State for navigation
+    @Binding var medications: [Medication]
+    @ObservedObject var viewModel: SetScheduleViewModel
+
+    @State private var navigateToSummary = false
 
     var body: some View {
         NavigationStack {
@@ -15,7 +14,6 @@ struct SetScheduleView: View {
                     .padding()
 
                 Group {
-                    // Frequency Section
                     Text("When Will You Take This?")
                         .font(.headline)
                     Picker("Change Frequency", selection: $viewModel.scheduleFrequency) {
@@ -26,13 +24,12 @@ struct SetScheduleView: View {
                     .pickerStyle(MenuPickerStyle())
                     .padding()
 
-                    // Time Section
                     Text("At What Time?")
                         .font(.headline)
                     VStack(alignment: .leading) {
                         ForEach(viewModel.specificTimes, id: \.self) { time in
                             HStack {
-                                Text(time) // Display formatted time string
+                                Text(time)
                                 Spacer()
                                 Text(viewModel.capsuleQuantity)
                             }
@@ -55,7 +52,6 @@ struct SetScheduleView: View {
                         }
                     }
 
-                    // Duration Section
                     Text("Duration")
                         .font(.headline)
                     HStack {
@@ -73,7 +69,6 @@ struct SetScheduleView: View {
                     .padding()
                 }
 
-                // Next Button to Summary
                 Button("Next") {
                     viewModel.onNextButtonTapped()
                     navigateToSummary = true
@@ -82,38 +77,32 @@ struct SetScheduleView: View {
                 .background(viewModel.showErrorMessage ? Color.red : Color.green)
                 .foregroundColor(.white)
                 .cornerRadius(10)
-                .disabled(viewModel.specificTimes.isEmpty) // Disable button if no time is added
+                .disabled(viewModel.specificTimes.isEmpty)
 
-                // Show error message
                 if viewModel.showErrorMessage {
                     Text("Please make sure all fields are filled correctly.")
                         .foregroundColor(.red)
                         .padding()
                 }
 
-                // Use NavigationLink to navigate to SummaryView
-                if navigateToSummary {
-                    NavigationLink(destination: SummaryView(
+                NavigationLink(
+                    destination: SummaryView(
                         medications: $medications,
                         viewModel: SummaryViewModel(
-                            medications: $medications, // Pass Binding to the ViewModel
+                            medications: $medications,
                             scheduleFrequency: viewModel.scheduleFrequency,
                             specificTimes: viewModel.specificTimes,
                             capsuleQuantity: viewModel.capsuleQuantity,
                             startDate: viewModel.startDate,
                             endDate: viewModel.endDate
                         )
-                    )) {
-                        EmptyView()
-                    }
-                    .hidden() // Hide the link, we are just using it for navigation purpose
+                    ),
+                    isActive: $navigateToSummary
+                ) {
+                    EmptyView()
                 }
             }
             .padding()
         }
     }
-}
-
-#Preview {
-    SetScheduleView(medications: .constant([]), viewModel: SetScheduleViewModel()) // Preview with empty medication list and ViewModel
 }
