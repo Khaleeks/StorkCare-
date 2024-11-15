@@ -1,11 +1,10 @@
 import SwiftUI
 
 struct RegistrationView: View {
-    @Binding var isAuthenticated: Bool  // Use @Binding to accept a reference
-
+    @Binding var isAuthenticated: Bool
     @ObservedObject var viewModel = RegistrationViewModel()
 
-    @State private var pregnantWomanViewModel = PregnantWomanViewModel() // Create a PregnantWomanViewModel for navigation
+    @State private var pregnantWomanViewModel = PregnantWomanViewModel()
 
     var body: some View {
         VStack(spacing: 20) {
@@ -13,19 +12,19 @@ struct RegistrationView: View {
                 .font(.largeTitle)
                 .bold()
                 .padding()
-                .accessibilityIdentifier("RegisterTitle") // Accessibility Identifier
+                .accessibilityIdentifier("RegisterTitle")
 
             TextField("Email", text: $viewModel.email)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding(.horizontal)
                 .autocapitalization(.none)
                 .keyboardType(.emailAddress)
-                .accessibilityIdentifier("EmailTextField") // Accessibility Identifier
-
+                .accessibilityIdentifier("EmailTextField")
+            
             SecureField("Password", text: $viewModel.password)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding(.horizontal)
-                .accessibilityIdentifier("PasswordSecureField") // Accessibility Identifier
+                .accessibilityIdentifier("PasswordSecureField")
 
             Picker("Select Your Role", selection: $viewModel.role) {
                 Text("Healthcare Provider").tag("Healthcare Provider")
@@ -33,7 +32,7 @@ struct RegistrationView: View {
             }
             .pickerStyle(SegmentedPickerStyle())
             .padding(.horizontal)
-            .accessibilityIdentifier("RolePicker") // Accessibility Identifier
+            .accessibilityIdentifier("RolePicker")
 
             Button("Register") {
                 viewModel.registerUser()
@@ -43,27 +42,26 @@ struct RegistrationView: View {
             .foregroundColor(.white)
             .cornerRadius(10)
             .disabled(viewModel.role.isEmpty)
-            .accessibilityIdentifier("RegisterButton") // Accessibility Identifier
+            .accessibilityIdentifier("RegisterButton")
 
             if let message = viewModel.message {
                 Text(message)
                     .foregroundColor(.green)
                     .padding()
-                    .accessibilityIdentifier("MessageLabel") // Accessibility Identifier
+                    .accessibilityIdentifier("MessageLabel")
             }
 
             if viewModel.isLoading {
                 ProgressView()
-                    .accessibilityIdentifier("LoadingProgressView") // Accessibility Identifier
+                    .accessibilityIdentifier("LoadingProgressView")
             }
         }
         .navigationDestination(isPresented: $viewModel.isAuthenticated) {
             if viewModel.role == "Healthcare Provider" {
-                HealthcarePage(uid: "someUID") // Example UID
+                HealthcarePage(uid: "someUID")
             } else if viewModel.role == "Pregnant Woman" {
-                PregnantWomanPage(viewModel: pregnantWomanViewModel, uid: "someUID") // Pass viewModel to PregnantWomanPage
+                PregnantWomanPage(viewModel: pregnantWomanViewModel, uid: "someUID")
             }
         }
     }
 }
-

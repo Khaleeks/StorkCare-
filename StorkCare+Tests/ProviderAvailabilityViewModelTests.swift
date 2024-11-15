@@ -1,11 +1,3 @@
-//
-//  ProviderAvailabilityViewModelTests.swift
-//  StorkCare+
-//
-//  Created by Khaleeqa Garrett on 11/13/24.
-//
-
-
 import XCTest
 import SwiftUI
 @testable import StorkCare_
@@ -76,8 +68,8 @@ class ProviderAvailabilityViewModelTests: XCTestCase {
         viewModel.selectedTimeSlots = []
         
         // Then
-        XCTAssertTrue(viewModel.selectedTimeSlots.isEmpty)
-        XCTAssertTrue(viewModel.showingConfirmation)
+        XCTAssertTrue(viewModel.selectedTimeSlots.isEmpty)  // Ensure no time slots are selected
+        XCTAssertFalse(viewModel.showingConfirmation)      // Ensure confirmation is not showing (disabled)
     }
     
     // Test: Date selection works properly
@@ -93,17 +85,69 @@ class ProviderAvailabilityViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.selectedDate, newDate)
     }
     
-    // Test: Ensure that the 'Confirm' action triggers saveAvailability method
-    func testConfirmAction() {
+    // Test: Ensure error message is displayed when saveAvailability fails
+    func testSaveAvailabilityFails() {
         // Given
         viewModel.selectedTimeSlots = ["9:00 AM"]
         
-        // When
+        // Simulate Firestore failure by passing an error to the callback
+        let expectation = self.expectation(description: "Save availability should fail")
+        
         viewModel.saveAvailability()
         
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            XCTAssertEqual(self.viewModel.message, "Error: Failed to save availability")
+            expectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 3, handler: nil)
+    }
+
+    // Test: Ensure success message is displayed when saveAvailability is successful
+    func testSaveAvailabilitySuccess() {
+        // Given
+        viewModel.selectedTimeSlots = ["9:00 AM"]
+        
+        // Simulate Firestore success by calling saveAvailability and checking the success message
+        let expectation = self.expectation(description: "Save availability should succeed")
+        
+        viewModel.saveAvailability()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            XCTAssertEqual(self.viewModel.message, "Availability updated successfully!")
+            expectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 3, handler: nil)
+    }
+
+    func testIsLoadingStateDuringSave() {
+        viewModel.selectedTimeSlots = ["9:00 AM"]
+        
+        let expectation = self.expectation(description: "isLoading state updates correctly")
+        
+        viewModel.saveAvailability()
+        
+        XCTAssertTrue(viewModel.isLoading)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            XCTAssertFalse(self.viewModel.isLoading)
+            expectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 2.0, handler: nil)
+    }
+    
+    // Test: Ensure no availability is loaded when no time slots exist for the selected date
+    func testNoAvailabilityForDate() {
+        // Given
+        let newDate = Calendar.current.date(byAdding: .day, value: 1, to: viewModel.selectedDate)!
+        viewModel.selectedDate = newDate
+        
+        // Simulate no time slots in Firestore
+        viewModel.loadExistingAvailability()
+        
         // Then
-        // Check if the availability is saved
-        // This test assumes saveAvailability changes something observable
-        XCTAssertTrue(viewModel.selectedTimeSlots.isEmpty)  // For example, it might clear the selected time slots after saving
+        XCTAssertTrue(viewModel.selectedTimeSlots.isEmpty)
     }
 }

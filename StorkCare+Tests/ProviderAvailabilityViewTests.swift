@@ -6,10 +6,16 @@ import ViewInspector
 class ProviderAvailabilityViewTests: XCTestCase {
     
     var providerAvailabilityView: ProviderAvailabilityView!
+    var mockViewModel: ProviderAvailabilityViewModel!
     
     override func setUp() {
         super.setUp()
-        providerAvailabilityView = ProviderAvailabilityView()
+        // Create a mock ViewModel and initialize the ProviderAvailabilityView with it.
+        mockViewModel = ProviderAvailabilityViewModel()
+        mockViewModel.providerData = ProviderData(name: "Dr. Smith", occupation: "Doctor", placeOfWork: "StorkCare Clinic", gender: "Female") // Mock data
+        mockViewModel.selectedTimeSlots = ["9:00 AM", "10:00 AM", "11:00 AM"]
+        mockViewModel.selectedDate = Date()
+        providerAvailabilityView = ProviderAvailabilityView(viewModel: mockViewModel)
     }
 
     func testProviderInfoCard() throws {
@@ -26,6 +32,7 @@ class ProviderAvailabilityViewTests: XCTestCase {
 
     func testTimeSlotButton() throws {
         let view = try providerAvailabilityView.inspect()
+        // Assuming the time slots are being dynamically generated based on the mock data
         let timeSlotButton = try view.find(viewWithId: "TimeSlotButton-9:00 AM")
         XCTAssertNotNil(timeSlotButton)
     }

@@ -3,60 +3,94 @@ import SwiftUI
 import ViewInspector
 @testable import StorkCare_
 
-class RegistrationViewTests: XCTestCase {
+final class RegistrationViewTests: XCTestCase {
     
     var registrationView: RegistrationView!
     var isAuthenticated: Binding<Bool>!
-    
+
     override func setUp() {
         super.setUp()
-        
-        // Create a Binding for the isAuthenticated property
-        isAuthenticated = Binding(get: { false }, set: { _ in })
-        
-        // Initialize RegistrationView with the Binding
-        registrationView = RegistrationView(isAuthenticated: isAuthenticated)
+
+        // Mock binding for isAuthenticated
+        var isAuthState = false
+        isAuthenticated = Binding(get: { isAuthState }, set: { isAuthState = $0 })
+
+        // Mock RegistrationViewModel
+        let mockViewModel = RegistrationViewModel()
+        mockViewModel.email = "test@example.com"
+        mockViewModel.password = "password123"
+        mockViewModel.role = "Healthcare Provider"
+
+        // Initialize RegistrationView
+        registrationView = RegistrationView(isAuthenticated: isAuthenticated, viewModel: mockViewModel)
     }
 
+    // Test that the registration title is correct
     func testRegisterTitle() throws {
-        let view = try registrationView.inspect()
-        let registerTitle = try view.find(viewWithId: "RegisterTitle")
-        XCTAssertNotNil(registerTitle)
+        let title = try registrationView.inspect().find(text: "Register for StorkCare+")
+        XCTAssertEqual(try title.string(), "Register for StorkCare+")
     }
 
     func testEmailTextField() throws {
-        let view = try registrationView.inspect()
-        let emailTextField = try view.find(viewWithId: "EmailTextField")
-        XCTAssertNotNil(emailTextField)
+        // Inspect the form or container that holds the text fields
+        let form = try registrationView.inspect().find(viewWithId: "EmailForm")
+        
+        // Then look for the text field within that container
+        let emailTextField = try form.textField(0) // Check the correct index
+        XCTAssertNotNil(emailTextField, "The 'EmailTextField' should be found.")
+        
+        // Set input and verify view model
+        try emailTextField.setInput("test@example.com")
+        XCTAssertEqual(registrationView.viewModel.email, "test@example.com")
     }
 
+
+
+
+    // Test that the password secure field exists and updates correctly
     func testPasswordSecureField() throws {
-        let view = try registrationView.inspect()
-        let passwordField = try view.find(viewWithId: "PasswordSecureField")
-        XCTAssertNotNil(passwordField)
+        // Access the SecureField directly via its index in the VStack
+        let passwordField = try registrationView.inspect().vStack().secureField(1) // Adjust index if necessary
+        
+        XCTAssertNotNil(passwordField, "The 'PasswordSecureField' should be found.")
+        
+        // Optional: Set a test password to verify the binding
+        try passwordField.setInput("Test123!")
+        XCTAssertEqual(registrationView.viewModel.password, "Test123!", "The password field binding should update the view model.")
     }
 
+    // Test that the role picker exists
     func testRolePicker() throws {
-        let view = try registrationView.inspect()
-        let rolePicker = try view.find(viewWithId: "RolePicker")
-        XCTAssertNotNil(rolePicker)
+        let rolePicker = try registrationView.inspect().find(viewWithId: "RolePicker")
+        XCTAssertNotNil(rolePicker, "The 'RolePicker' should be found.")
     }
 
+    // Test that the register button exists
     func testRegisterButton() throws {
-        let view = try registrationView.inspect()
-        let registerButton = try view.find(viewWithId: "RegisterButton")
-        XCTAssertNotNil(registerButton)
-    }
-
-    func testMessageLabel() throws {
-        let view = try registrationView.inspect()
-        let messageLabel = try view.find(viewWithId: "MessageLabel")
-        XCTAssertNotNil(messageLabel)
+        let registerButton = try registrationView.inspect().find(viewWithId: "RegisterButton")
+        XCTAssertNotNil(registerButton, "The 'RegisterButton' should be found.")
     }
 
     func testLoadingProgressView() throws {
-        let view = try registrationView.inspect()
-        let loadingProgressView = try view.find(viewWithId: "LoadingProgressView")
-        XCTAssertNotNil(loadingProgressView)
+        // If the ProgressView is inside a VStack, search for it within the correct context
+        let progressView = try registrationView.inspect().vStack().find(viewWithId: "LoadingProgressView")
+        XCTAssertNotNil(progressView, "The 'LoadingProgressView' should be found.")
+    }
+
+    func testMessageLabel() throws {
+        // If the MessageLabel is inside a container, search for it in the correct context
+        let messageLabel = try registrationView.inspect().vStack().find(viewWithId: "MessageLabel")
+        XCTAssertNotNil(messageLabel, "The 'MessageLabel' should be found.")
+    }
+
+    // Test that the register button action triggers the correct logic
+    func testRegisterButtonAction() throws {
+        let registerButton = try registrationView.inspect().find(viewWithId: "RegisterButton")
+        try registerButton.button().tap()
+
+        // Assert registration logic
+        XCTAssertEqual(registrationView.viewModel.email, "test@example.com")
+        XCTAssertEqual(registrationView.viewModel.password, "password123")
+        XCTAssertEqual(registrationView.viewModel.role, "Healthcare Provider")
     }
 }

@@ -1,10 +1,8 @@
+// RegistrationViewModelTests.swift
+// StorkCare+
 //
-//  RegistrationViewModelTests.swift
-//  StorkCare+
+// Created by Khaleeqa Garrett on 11/11/24.
 //
-//  Created by Khaleeqa Garrett on 11/11/24.
-//
-
 
 import XCTest
 @testable import StorkCare_
@@ -33,6 +31,11 @@ class RegistrationViewModelTests: XCTestCase {
         XCTAssertFalse(viewModel.validateEmail(), "The email should be invalid.")
     }
 
+    func testEmailValidation_EmptyEmail() {
+        viewModel.email = ""
+        XCTAssertFalse(viewModel.validateEmail(), "The email should be invalid when empty.")
+    }
+
     func testPasswordValidation_ValidPassword() {
         viewModel.password = "Password1!"
         XCTAssertTrue(viewModel.validatePassword(), "The password should be valid.")
@@ -46,6 +49,11 @@ class RegistrationViewModelTests: XCTestCase {
     func testPasswordValidation_InvalidPassword_NoSpecialCharacter() {
         viewModel.password = "Password123"
         XCTAssertFalse(viewModel.validatePassword(), "The password should be invalid without a special character.")
+    }
+
+    func testPasswordValidation_EmptyPassword() {
+        viewModel.password = ""
+        XCTAssertFalse(viewModel.validatePassword(), "The password should be invalid when empty.")
     }
 
     func testRegisterUser_ValidInput() {
@@ -80,4 +88,53 @@ class RegistrationViewModelTests: XCTestCase {
         XCTAssertFalse(viewModel.isAuthenticated, "The user should not be authenticated with invalid password.")
         XCTAssertEqual(viewModel.message, "Password must be at least 6 to 30 characters long, contain a number, and a special character.", "The error message should indicate invalid password.")
     }
+
+    func testRegisterUser_EmptyRole() {
+        viewModel.email = "test@example.com"
+        viewModel.password = "Password1!"
+        viewModel.role = ""
+
+        viewModel.registerUser()
+
+        XCTAssertFalse(viewModel.isAuthenticated, "The user should not be authenticated when the role is empty.")
+        XCTAssertEqual(viewModel.message, "Please select a role.", "The error message should indicate that a role needs to be selected.")
+    }
+
+    func testRegisterUser_SuccessfulWithHealthcareProviderRole() {
+        viewModel.email = "provider@example.com"
+        viewModel.password = "Password1!"
+        viewModel.role = "Healthcare Provider"
+
+        viewModel.registerUser()
+
+        XCTAssertTrue(viewModel.isAuthenticated, "The user should be authenticated.")
+        XCTAssertEqual(viewModel.message, "Registration successful!", "The registration message should be success.")
+    }
+
+    func testRegisterUser_InvalidRoleWithSpaces() {
+        viewModel.email = "test@example.com"
+        viewModel.password = "Password1!"
+        viewModel.role = "Pregnant Woman "
+
+        viewModel.registerUser()
+
+        XCTAssertTrue(viewModel.isAuthenticated, "The user should be authenticated even if the role contains trailing spaces.")
+        XCTAssertEqual(viewModel.message, "Registration successful!", "The registration message should be success.")
+    }
+
+    func testAuthenticationState_AfterRegistration() {
+        viewModel.email = "test@example.com"
+        viewModel.password = "Password1!"
+        viewModel.role = "Pregnant Woman"
+
+        viewModel.registerUser()
+
+        XCTAssertTrue(viewModel.isAuthenticated, "The user should be authenticated after successful registration.")
+    }
+
+    func testPasswordValidation_MinimumLength() {
+        viewModel.password = "P@ssw1"
+        XCTAssertTrue(viewModel.validatePassword(), "The password should be valid when it's exactly 6 characters long.")
+    }
+
 }

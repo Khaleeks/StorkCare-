@@ -2,7 +2,6 @@ import XCTest
 @testable import StorkCare_
 
 // Mock FirestoreService for testing
-// Mock FirestoreService for testing
 class MockFirestoreService: FirestoreServiceProtocol {
     var result: Result<Void, Error> = .success(()) // Default to success
 
@@ -10,7 +9,6 @@ class MockFirestoreService: FirestoreServiceProtocol {
         completion(result) // Simulates the result set in tests
     }
 }
-
 
 class HealthcarePageViewModelTests: XCTestCase {
 
