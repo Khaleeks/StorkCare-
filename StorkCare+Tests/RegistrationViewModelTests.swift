@@ -50,6 +50,7 @@ class RegistrationViewModelTests: XCTestCase {
         viewModel.password = "Password123"
         XCTAssertFalse(viewModel.validatePassword(), "The password should be invalid without a special character.")
     }
+    
 
     func testPasswordValidation_EmptyPassword() {
         viewModel.password = ""
@@ -136,5 +137,15 @@ class RegistrationViewModelTests: XCTestCase {
         viewModel.password = "P@ssw1"
         XCTAssertTrue(viewModel.validatePassword(), "The password should be valid when it's exactly 6 characters long.")
     }
-
+    
+    func testRegisterUser_InvalidRole() {
+        viewModel.email = "test@example.com"
+        viewModel.password = "Password"
+        viewModel.role = ""
+        
+        viewModel.registerUser()
+        
+        XCTAssertFalse(viewModel.isAuthenticated, "The user should not be authenticated with invalid role.")
+        XCTAssertEqual(viewModel.message, "Please select a role.")
+    }
 }
