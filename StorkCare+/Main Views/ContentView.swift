@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var searchText: String = "" // State variable for the search bar
-    @State private var medications: [Medication] = [] // State variable to hold medications
+    @State internal var searchText: String = "" // State variable for the search bar
+    @State internal var medications: [Medication] = [] // State variable to hold medications
 
     // Define the use cases with their names, icons, and colors
     let useCases: [(title: String, icon: String, color: Color)] = [
@@ -24,7 +24,7 @@ struct ContentView: View {
             VStack(spacing: 20) {
                 // Search Bar
                 HStack {
-                    TextField("Search...", text: $searchText)
+                    TextField("Searc h...", text: $searchText)
                         .padding(10)
                         .background(Color(.systemGray6))
                         .cornerRadius(10)
@@ -69,7 +69,7 @@ struct ContentView: View {
 
     // ViewBuilder for navigating to appropriate views based on selection
     @ViewBuilder
-    private func destinationView(for useCase: String) -> some View {
+    internal func destinationView(for useCase: String) -> some View {
         switch useCase {
         case "Track Baby Development":
             TrackBabyDevelopmentView()
