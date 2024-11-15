@@ -35,7 +35,8 @@ struct PregnantWomanPage: View {
                         Spacer()
                         TextField("Enter your name", text: $viewModel.name)
                             .multilineTextAlignment(.trailing)
-                            .tag(1) // Add tag to the name TextField for testing
+                            .tag(1) // Correct tag for the name field
+                            .accessibilityLabel("Name")
                     }
 
                     HStack {
@@ -112,7 +113,7 @@ struct PregnantWomanPage: View {
             .foregroundColor(.white)
             .cornerRadius(10)
             .padding(.horizontal)
-
+            .accessibilityLabel("Continue")
         }
         .navigationDestination(isPresented: $viewModel.isProfileCreated) {
             ContentView() // Navigate to main features page
@@ -155,6 +156,7 @@ struct PregnantWomanPage: View {
                 }
                 .pickerStyle(.wheel)
                 .tag(3) // Tag for height picker sheet
+                .accessibilityIdentifier("HeightPicker")
 
                 Button(action: {
                     viewModel.showHeightPicker = false
@@ -181,6 +183,8 @@ struct PregnantWomanPage: View {
                     }
                 }
                 .pickerStyle(.wheel)
+                .tag(4) // Update this to ensure unique tags
+                .accessibilityIdentifier("WeightPicker")
 
                 Button(action: {
                     viewModel.showWeightPicker = false

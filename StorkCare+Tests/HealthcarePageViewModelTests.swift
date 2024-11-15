@@ -2,13 +2,15 @@ import XCTest
 @testable import StorkCare_
 
 // Mock FirestoreService for testing
+// Mock FirestoreService for testing
 class MockFirestoreService: FirestoreServiceProtocol {
-    var result: Result<Void, Error> = .success(())
-    
+    var result: Result<Void, Error> = .success(()) // Default to success
+
     func saveHealthcareProviderData(uid: String, gender: String, occupation: String, placeOfWork: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        completion(result)
+        completion(result) // Simulates the result set in tests
     }
 }
+
 
 class HealthcarePageViewModelTests: XCTestCase {
 
@@ -29,152 +31,115 @@ class HealthcarePageViewModelTests: XCTestCase {
 
     // 1. Test: Check if initial values are correctly set in ViewModel
     func testInitialValues() {
-        // Given
-        let expectedGender = ""
-        let expectedOccupation = ""
-        let expectedPlaceOfWork = ""
-        let expectedMessage: String? = nil
-        let expectedIsOnboardingComplete = false
-
-        // When
-        // No action needed, we're just checking initial values
-
-        // Then
-        XCTAssertEqual(viewModel.gender, expectedGender)
-        XCTAssertEqual(viewModel.occupation, expectedOccupation)
-        XCTAssertEqual(viewModel.placeOfWork, expectedPlaceOfWork)
-        XCTAssertEqual(viewModel.message, expectedMessage)
-        XCTAssertEqual(viewModel.isOnboardingComplete, expectedIsOnboardingComplete)
+        XCTAssertEqual(viewModel.gender, "")
+        XCTAssertEqual(viewModel.occupation, "")
+        XCTAssertEqual(viewModel.placeOfWork, "")
+        XCTAssertNil(viewModel.message)
+        XCTAssertFalse(viewModel.isOnboardingComplete)
     }
 
     // 2. Test: Verify that saveHealthcareProviderData handles success correctly
     func testSaveHealthcareProviderDataSuccess() {
-        let expectation = self.expectation(description: "Async call for saveHealthcareProviderData success")
-        // Given
+        let expectation = self.expectation(description: "Save data succeeds")
+
         viewModel.gender = "Female"
         viewModel.occupation = "Doctor"
         viewModel.placeOfWork = "StorkCare Hospital"
         
-        // Simulate success
         mockFirestoreService.result = .success(())
-
-        // When
+        
         viewModel.saveHealthcareProviderData(uid: "testUID")
-        expectation.fulfill()
-        waitForExpectations(timeout: 2, handler: nil)
-        expectation.fulfill()
-        waitForExpectations(timeout: 2, handler: nil)
-        expectation.fulfill()
-        waitForExpectations(timeout: 2, handler: nil)
-        expectation.fulfill()
-        waitForExpectations(timeout: 2, handler: nil)
-
-        // Then
-        XCTAssertEqual(viewModel.message, "Onboarding complete!")
-        XCTAssertTrue(viewModel.isOnboardingComplete)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            XCTAssertEqual(self.viewModel.message, "Onboarding complete!")
+            XCTAssertTrue(self.viewModel.isOnboardingComplete)
+            expectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 1.0, handler: nil)
     }
 
     // 3. Test: Verify that saveHealthcareProviderData handles failure correctly
     func testSaveHealthcareProviderDataFailure() {
-        let expectation = self.expectation(description: "Async call for saveHealthcareProviderData failure")
-        // Given
+        let expectation = self.expectation(description: "Save data fails")
+
         viewModel.gender = "Male"
         viewModel.occupation = "Nurse"
         viewModel.placeOfWork = "CareHealth Clinic"
         
-        // Simulate failure
-        let error = NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Network error"])
-        mockFirestoreService.result = .failure(error)
-
-        // When
+        mockFirestoreService.result = .failure(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Network error"]))
+        
         viewModel.saveHealthcareProviderData(uid: "testUID")
-        expectation.fulfill()
-        waitForExpectations(timeout: 2, handler: nil)
-        expectation.fulfill()
-        waitForExpectations(timeout: 2, handler: nil)
-        expectation.fulfill()
-        waitForExpectations(timeout: 2, handler: nil)
-        expectation.fulfill()
-        waitForExpectations(timeout: 2, handler: nil)
-
-        // Then
-        XCTAssertEqual(viewModel.message, "Failed to save data: Network error")
-        XCTAssertFalse(viewModel.isOnboardingComplete)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            XCTAssertEqual(self.viewModel.message, "Failed to save data: Network error")
+            XCTAssertFalse(self.viewModel.isOnboardingComplete)
+            expectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 1.0, handler: nil)
     }
 
-    // 4. Test: Check saveHealthcareProviderData when some fields are empty
+    // 4. Test: Verify saveHealthcareProviderData when some fields are empty
     func testSaveHealthcareProviderDataWithEmptyFields() {
-        let expectation = self.expectation(description: "Async call for saveHealthcareProviderData with empty fields")
-        // Given
+        let expectation = self.expectation(description: "Missing fields validation")
+
         viewModel.gender = "" // Empty gender
-        viewModel.occupation = "Doctor" // Occupation filled
-        viewModel.placeOfWork = "" // Empty place of work
+        viewModel.occupation = "Doctor"
+        viewModel.placeOfWork = "StorkCare Hospital"
         
-        // Simulate success
         mockFirestoreService.result = .success(())
-
-        // When
+        
         viewModel.saveHealthcareProviderData(uid: "testUID")
-        expectation.fulfill()
-        waitForExpectations(timeout: 2, handler: nil)
-        expectation.fulfill()
-        waitForExpectations(timeout: 2, handler: nil)
-        expectation.fulfill()
-        waitForExpectations(timeout: 2, handler: nil)
-        expectation.fulfill()
-        waitForExpectations(timeout: 2, handler: nil)
-
-        // Then
-        XCTAssertEqual(viewModel.message, "Onboarding complete!")
-        XCTAssertTrue(viewModel.isOnboardingComplete)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            XCTAssertEqual(self.viewModel.message, "Please fill in all fields")
+            XCTAssertFalse(self.viewModel.isOnboardingComplete)
+            expectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 1.0, handler: nil)
     }
 
     // 5. Test: Verify saveHealthcareProviderData with invalid UID (error case)
     func testSaveHealthcareProviderDataWithInvalidUID() {
-        let expectation = self.expectation(description: "Async call for saveHealthcareProviderData with invalid UID")
-        // Given
+        let expectation = self.expectation(description: "Invalid UID error")
+
         viewModel.gender = "Female"
         viewModel.occupation = "Doctor"
         viewModel.placeOfWork = "StorkCare Hospital"
         
-        // Simulate failure due to invalid UID
-        let error = NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Invalid user ID"])
-        mockFirestoreService.result = .failure(error)
-
-        // When
+        mockFirestoreService.result = .failure(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Invalid user ID"]))
+        
         viewModel.saveHealthcareProviderData(uid: "invalidUID")
-        expectation.fulfill()
-        waitForExpectations(timeout: 2, handler: nil)
-
-        // Then
-        XCTAssertEqual(viewModel.message, "Failed to save data: Invalid user ID")
-        XCTAssertFalse(viewModel.isOnboardingComplete)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            XCTAssertEqual(self.viewModel.message, "Failed to save data: Invalid user ID")
+            XCTAssertFalse(self.viewModel.isOnboardingComplete)
+            expectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 1.0, handler: nil)
     }
 
     // 6. Test: Verify saveHealthcareProviderData works with different user data
     func testSaveHealthcareProviderDataWithDifferentUserData() {
-        let expectation = self.expectation(description: "Async call for saveHealthcareProviderData with different user data")
-        // Given
+        let expectation = self.expectation(description: "Save data with different user data")
+
         viewModel.gender = "Nonbinary"
         viewModel.occupation = "Midwife"
         viewModel.placeOfWork = "City Clinic"
         
-        // Simulate success
         mockFirestoreService.result = .success(())
-
-        // When
+        
         viewModel.saveHealthcareProviderData(uid: "testUID")
-        expectation.fulfill()
-        waitForExpectations(timeout: 2, handler: nil)
-        expectation.fulfill()
-        waitForExpectations(timeout: 2, handler: nil)
-        expectation.fulfill()
-        waitForExpectations(timeout: 2, handler: nil)
-        expectation.fulfill()
-        waitForExpectations(timeout: 2, handler: nil)
-
-        // Then
-        XCTAssertEqual(viewModel.message, "Onboarding complete!")
-        XCTAssertTrue(viewModel.isOnboardingComplete)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            XCTAssertEqual(self.viewModel.message, "Onboarding complete!")
+            XCTAssertTrue(self.viewModel.isOnboardingComplete)
+            expectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 1.0, handler: nil)
     }
 }

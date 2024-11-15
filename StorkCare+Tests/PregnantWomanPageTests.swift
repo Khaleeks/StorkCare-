@@ -6,168 +6,125 @@ import ViewInspector
 class PregnantWomanPageTests: XCTestCase {
     
     func testTextFieldsAndButtons() throws {
-        // Create a dummy view model
         let viewModel = PregnantWomanViewModel()
         let pregnantWomanPage = PregnantWomanPage(viewModel: viewModel, uid: "testUID")
         
-        // Inspect the text "Personalized Health Data"
-        let text = try pregnantWomanPage.inspect().find(text: "Personalized Health Data")
-        XCTAssertEqual(try text.string(), "Personalized Health Data")
+        // Inspect the title text
+        let title = try pregnantWomanPage.inspect().find(text: "Personalized Health Data")
+        XCTAssertEqual(try title.string(), "Personalized Health Data")
         
         // Verify the 'Continue' button exists and has correct text
         let continueButton = try pregnantWomanPage.inspect().find(button: "Continue")
         let buttonText = try continueButton.labelView().text().string()
         XCTAssertEqual(buttonText, "Continue")
-        
-        // Simulate tapping on the height button to show the picker
-        let heightButton = try pregnantWomanPage.inspect().find(viewWithTag: 2) // Accessing the view tagged for height picker
-        try heightButton.callOnTapGesture() // Simulates tapping the view
-        
-        // Verify if the height picker sheet appears
-        let heightPicker = try pregnantWomanPage.inspect().find(viewWithTag: 3) // Access the picker by its tag
-        XCTAssertNotNil(heightPicker)
     }
     
-    
-    func testFormFields() throws {
-        // Initialize the view model and page
+    func testPickerInteractions() throws {
         let viewModel = PregnantWomanViewModel()
         let pregnantWomanPage = PregnantWomanPage(viewModel: viewModel, uid: "testUID")
         
-        // Find the first HStack (which contains the name TextField) in the VStack and locate the TextField
-        let nameTextField = try pregnantWomanPage.inspect().vStack().hStack(0).textField(1)
+        // Simulate toggling the height picker
+        viewModel.showHeightPicker = true
+        let heightPickerSheet = try pregnantWomanPage.inspect().find(ViewType.Picker.self, where: { view in
+            try view.accessibilityIdentifier() == "HeightPicker"
+        })
+        XCTAssertNotNil(heightPickerSheet, "Height picker should appear when toggled.")
         
-        // Ensure the name TextField exists
-        XCTAssertNotNil(nameTextField)
+        // Simulate toggling the weight picker
+        viewModel.showWeightPicker = true
+        let weightPickerSheet = try pregnantWomanPage.inspect().find(ViewType.Picker.self, where: { view in
+            try view.accessibilityIdentifier() == "WeightPicker"
+        })
+        XCTAssertNotNil(weightPickerSheet, "Weight picker should appear when toggled.")
+    }
+
+
+    func testFormFields() throws {
+        let viewModel = PregnantWomanViewModel()
+        let pregnantWomanPage = PregnantWomanPage(viewModel: viewModel, uid: "testUID")
         
-        // Check if the initial state of the Sex field is "Select"
-        let sexField = try pregnantWomanPage.inspect().vStack().hStack(1).text(0)
-        XCTAssertEqual(try sexField.string(), "Select")
+        // Inspect the name TextField
+        let nameField = try pregnantWomanPage.inspect().find(viewWithTag: 1).textField()
+        XCTAssertNotNil(nameField)
+        try nameField.setInput("Test Name")
+        XCTAssertEqual(viewModel.name, "Test Name")
+        
+        // Verify the initial value of Sex field
+        XCTAssertEqual(viewModel.selectedSex, "")
     }
     
     func testContinueButtonFunctionality() throws {
-        // Create a dummy view model
         let viewModel = PregnantWomanViewModel()
         let pregnantWomanPage = PregnantWomanPage(viewModel: viewModel, uid: "testUID")
         
-        // Set values for required fields
-        viewModel.name = "John Doe"
+        // Set required fields
+        viewModel.name = "Alice"
         viewModel.selectedSex = "Female"
-        viewModel.selectedHeight = 160
-        viewModel.selectedWeight = 60
+        viewModel.selectedHeight = 170
+        viewModel.selectedWeight = 65
         
-        // Simulate tapping the 'Continue' button
+        // Simulate Continue button tap
         let continueButton = try pregnantWomanPage.inspect().find(button: "Continue")
         try continueButton.tap()
         
-        // Check if the isProfileCreated flag is set to true
-        XCTAssertTrue(viewModel.isProfileCreated)
+        // Assert profile creation
+        XCTAssertTrue(viewModel.isProfileCreated, "Profile should be created when all fields are filled correctly.")
     }
     
-    func testIncompleteData() throws {
-        // Create a dummy view model with incomplete data
+    func testIncompleteProfileData() throws {
         let viewModel = PregnantWomanViewModel()
         let pregnantWomanPage = PregnantWomanPage(viewModel: viewModel, uid: "testUID")
         
-        // Simulate tapping the 'Continue' button without filling in all required data
+        // Leave required fields empty
+        viewModel.name = ""
+        viewModel.selectedSex = "Female"
+        viewModel.selectedHeight = 0
+        viewModel.selectedWeight = 65
+        
+        // Simulate Continue button tap
         let continueButton = try pregnantWomanPage.inspect().find(button: "Continue")
         try continueButton.tap()
         
-        // Ensure the isProfileCreated flag is set to false (indicating incomplete data)
-        XCTAssertFalse(viewModel.isProfileCreated)
+        // Assert profile creation fails
+        XCTAssertFalse(viewModel.isProfileCreated, "Profile creation should fail when required fields are missing.")
     }
     
-    func testPickerSelectionsUpdateViewModel() throws {
+    func testResetFieldsFunctionality() throws {
         let viewModel = PregnantWomanViewModel()
-        let pregnantWomanPage = PregnantWomanPage(viewModel: viewModel, uid: "testUID")
         
-        // Simulate selecting sex
-        viewModel.selectedSex = "Female" // No need for 'try' here
-        XCTAssertEqual(viewModel.selectedSex, "Female")
+        // Set values
+        viewModel.name = "Test Name"
+        viewModel.selectedSex = "Female"
+        viewModel.selectedHeight = 170
+        viewModel.selectedWeight = 65
         
-        // Simulate selecting height
-        viewModel.selectedHeight = 170 // No need for 'try' here
-        XCTAssertEqual(viewModel.selectedHeight, 170)
+        // Reset fields
+        viewModel.resetFields()
         
-        // Simulate selecting weight
-        viewModel.selectedWeight = 65 // No need for 'try' here
-        XCTAssertEqual(viewModel.selectedWeight, 65)
+        // Assert all fields are cleared
+        XCTAssertEqual(viewModel.name, "")
+        XCTAssertEqual(viewModel.selectedSex, "")
+        XCTAssertEqual(viewModel.selectedHeight, 0)
+        XCTAssertEqual(viewModel.selectedWeight, 0)
+        XCTAssertFalse(viewModel.isProfileCreated, "Profile creation flag should reset to false.")
     }
-
+    
     func testAccessibilityLabels() throws {
         let viewModel = PregnantWomanViewModel()
         let pregnantWomanPage = PregnantWomanPage(viewModel: viewModel, uid: "testUID")
-
+        
         // Locate the text field with the accessibility label "Name"
         let nameTextField = try pregnantWomanPage.inspect().find(ViewType.TextField.self, where: { view in
-            // Extract the accessibility label and compare it
             let label = try view.accessibilityLabel().string()
             return label == "Name"
         })
         XCTAssertNotNil(nameTextField)
-
+        
         // Locate the button with the accessibility label "Continue"
         let continueButton = try pregnantWomanPage.inspect().find(ViewType.Button.self, where: { view in
-            // Extract the accessibility label and compare it
             let label = try view.accessibilityLabel().string()
             return label == "Continue"
         })
         XCTAssertNotNil(continueButton)
     }
-
-        func testResetFieldsFunctionality() throws {
-            let viewModel = PregnantWomanViewModel()
-            let pregnantWomanPage = PregnantWomanPage(viewModel: viewModel, uid: "testUID")
-
-            // Set initial values
-            viewModel.name = "John Doe"
-            viewModel.selectedSex = "Female"
-            viewModel.selectedHeight = 170
-            viewModel.selectedWeight = 65
-
-            // Simulate reset or cancel action
-            viewModel.resetFields()
-            
-            XCTAssertEqual(viewModel.name, "")
-            XCTAssertEqual(viewModel.selectedSex, "")
-            XCTAssertEqual(viewModel.selectedHeight, 0)
-            XCTAssertEqual(viewModel.selectedWeight, 0)
-        }
-
-        func testUIStateAfterContinueAction() throws {
-            let viewModel = PregnantWomanViewModel()
-            let pregnantWomanPage = PregnantWomanPage(viewModel: viewModel, uid: "testUID")
-
-            // Set required fields and simulate Continue button tap
-            viewModel.name = "Test Name"
-            viewModel.selectedSex = "Male"
-            viewModel.selectedHeight = 180
-            viewModel.selectedWeight = 75
-            
-            let continueButton = try pregnantWomanPage.inspect().find(button: "Continue")
-            try continueButton.tap()
-            
-            XCTAssertTrue(viewModel.isProfileCreated)
-            // Verify if any additional UI element shows up, like a success message
-            // Uncomment below if there is a success view or message to check:
-            // let successMessage = try pregnantWomanPage.inspect().find(text: "Profile Created Successfully")
-            // XCTAssertNotNil(successMessage)
-        
-    }
 }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
-
-
-

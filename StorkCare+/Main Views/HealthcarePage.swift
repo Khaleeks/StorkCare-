@@ -7,11 +7,15 @@
 
 import SwiftUI
 
-struct HealthcarePage: View {
-    @ObservedObject var viewModel = HealthcarePageViewModel()
-    
-    var uid: String // Pass the authenticated user's UID
 
+struct HealthcarePage: View {
+    @ObservedObject var viewModel: HealthcarePageViewModel
+    var uid: String
+
+    init(uid: String, viewModel: HealthcarePageViewModel = HealthcarePageViewModel()) {
+        self.uid = uid
+        self.viewModel = viewModel
+    }
     var body: some View {
         VStack {
             Text("Healthcare Provider Onboarding")

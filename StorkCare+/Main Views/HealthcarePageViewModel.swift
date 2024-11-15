@@ -41,17 +41,26 @@ class HealthcarePageViewModel: ObservableObject {
     }
 
     func saveHealthcareProviderData(uid: String) {
+        guard !gender.isEmpty, !occupation.isEmpty, !placeOfWork.isEmpty else {
+            self.message = "Please fill in all fields"
+            self.isOnboardingComplete = false
+            return
+        }
+        
         firestoreService.saveHealthcareProviderData(uid: uid, gender: gender, occupation: occupation, placeOfWork: placeOfWork) { result in
-            switch result {
-            case .success:
-                self.message = "Onboarding complete!"
-                self.isOnboardingComplete = true
-            case .failure(let error):
-                self.message = "Failed to save data: \(error.localizedDescription)"
-                self.isOnboardingComplete = false
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    self.message = "Onboarding complete!"
+                    self.isOnboardingComplete = true
+                case .failure(let error):
+                    self.message = "Failed to save data: \(error.localizedDescription)"
+                    self.isOnboardingComplete = false
+                }
             }
         }
     }
+
 
     
     
