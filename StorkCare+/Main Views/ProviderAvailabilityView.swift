@@ -1,8 +1,7 @@
 import SwiftUI
 
-// Define the ProviderAvailabilityView
 struct ProviderAvailabilityView: View {
-    @StateObject private var viewModel = ProviderAvailabilityViewModel()
+    @ObservedObject var viewModel = ProviderAvailabilityViewModel()
 
     let timeSlots = [
         "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
@@ -13,16 +12,19 @@ struct ProviderAvailabilityView: View {
         GeometryReader { geometry in
             ScrollView(.vertical, showsIndicators: true) {
                 VStack(spacing: 20) {
-                    // Provider Info Section
+                    
+                    // MARK: - Provider Info Section
                     if !viewModel.providerData.occupation.isEmpty {
                         ProviderInfoCard(providerData: viewModel.providerData)
+                            .accessibilityIdentifier("ProviderInfoCard") // Accessibility Identifier for provider info card
                     }
                     
-                    // Calendar Section
+                    // MARK: - Calendar Section
                     VStack(alignment: .leading) {
                         Text("Select Date")
                             .font(.headline)
                             .padding(.horizontal)
+                            .accessibilityIdentifier("DateLabel") // Accessibility Identifier for Date label
                         
                         DatePicker(
                             "Select Date",
@@ -32,16 +34,18 @@ struct ProviderAvailabilityView: View {
                         )
                         .datePickerStyle(.graphical)
                         .padding()
+                        .accessibilityIdentifier("DatePicker") // Accessibility Identifier for DatePicker
                     }
                     .background(Color.gray.opacity(0.1))
                     .cornerRadius(10)
                     .padding(.horizontal)
                     
-                    // Time Slots Section
+                    // MARK: - Time Slots Section
                     VStack(alignment: .leading) {
                         Text("Available Time Slots")
                             .font(.headline)
                             .padding(.bottom, 5)
+                            .accessibilityIdentifier("TimeSlotsLabel") // Accessibility Identifier for Time Slots label
                         
                         LazyVGrid(columns: [
                             GridItem(.flexible()),
@@ -55,6 +59,7 @@ struct ProviderAvailabilityView: View {
                                         toggleTimeSlot(time)
                                     }
                                 )
+                                .accessibilityIdentifier("TimeSlotButton-\(time)") // Accessibility Identifier for each time slot button
                             }
                         }
                     }
@@ -63,7 +68,7 @@ struct ProviderAvailabilityView: View {
                     .cornerRadius(10)
                     .padding(.horizontal)
                     
-                    // Confirm Button
+                    // MARK: - Confirm Button Section
                     Button(action: {
                         viewModel.showingConfirmation = true
                     }) {
@@ -76,11 +81,14 @@ struct ProviderAvailabilityView: View {
                     }
                     .disabled(viewModel.selectedTimeSlots.isEmpty)
                     .padding(.horizontal)
+                    .accessibilityIdentifier("ConfirmButton") // Accessibility Identifier for the confirm button
                     
+                    // MARK: - Message Section (Success/Error)
                     if let message = viewModel.message {
                         Text(message)
                             .foregroundColor(message.contains("Error") ? .red : .green)
                             .padding()
+                            .accessibilityIdentifier("MessageLabel") // Accessibility Identifier for the message label
                     }
                     
                     Spacer()
@@ -90,6 +98,7 @@ struct ProviderAvailabilityView: View {
             }
         }
         .onAppear {
+            // MARK: - ViewModel Data Load
             viewModel.loadProviderData()
             viewModel.loadExistingAvailability()
         }
@@ -103,6 +112,7 @@ struct ProviderAvailabilityView: View {
         }
     }
     
+    // MARK: - Toggle Time Slot Function
     private func toggleTimeSlot(_ time: String) {
         if viewModel.selectedTimeSlots.contains(time) {
             viewModel.selectedTimeSlots.remove(time)
@@ -111,6 +121,7 @@ struct ProviderAvailabilityView: View {
         }
     }
     
+    // MARK: - Helper Function to Format Date
     private func formatDateForDisplay(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
@@ -118,7 +129,6 @@ struct ProviderAvailabilityView: View {
     }
 }
 
-// Provider Info Card View
 struct ProviderInfoCard: View {
     var providerData: ProviderData
 
@@ -127,15 +137,19 @@ struct ProviderInfoCard: View {
             Text(providerData.name)
                 .font(.title)
                 .bold()
+                .accessibilityIdentifier("ProviderName") // Accessibility Identifier for provider name
             Text(providerData.occupation)
                 .font(.subheadline)
                 .foregroundColor(.gray)
+                .accessibilityIdentifier("ProviderOccupation") // Accessibility Identifier for provider occupation
             Text(providerData.placeOfWork)
                 .font(.subheadline)
                 .foregroundColor(.gray)
+                .accessibilityIdentifier("ProviderPlaceOfWork") // Accessibility Identifier for provider place of work
             Text(providerData.gender)
                 .font(.subheadline)
                 .foregroundColor(.gray)
+                .accessibilityIdentifier("ProviderGender") // Accessibility Identifier for provider gender
         }
         .padding()
         .background(Color.white)
@@ -145,12 +159,11 @@ struct ProviderInfoCard: View {
     }
 }
 
-// Time Slot Button View
 struct TimeSlotButton: View {
     var time: String
     var isSelected: Bool
     var action: () -> Void
-
+    
     var body: some View {
         Button(action: action) {
             Text(time)

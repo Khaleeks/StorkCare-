@@ -1,11 +1,3 @@
-//
-//  StorkCare+
-//
-//  Created by Bamlak T on 11/7/24.
-//
-
-
-// RegistrationView.swift
 import SwiftUI
 
 struct RegistrationView: View {
@@ -21,16 +13,19 @@ struct RegistrationView: View {
                 .font(.largeTitle)
                 .bold()
                 .padding()
+                .accessibilityIdentifier("RegisterTitle") // Accessibility Identifier
 
             TextField("Email", text: $viewModel.email)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding(.horizontal)
                 .autocapitalization(.none)
                 .keyboardType(.emailAddress)
+                .accessibilityIdentifier("EmailTextField") // Accessibility Identifier
 
             SecureField("Password", text: $viewModel.password)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding(.horizontal)
+                .accessibilityIdentifier("PasswordSecureField") // Accessibility Identifier
 
             Picker("Select Your Role", selection: $viewModel.role) {
                 Text("Healthcare Provider").tag("Healthcare Provider")
@@ -38,6 +33,7 @@ struct RegistrationView: View {
             }
             .pickerStyle(SegmentedPickerStyle())
             .padding(.horizontal)
+            .accessibilityIdentifier("RolePicker") // Accessibility Identifier
 
             Button("Register") {
                 viewModel.registerUser()
@@ -47,15 +43,18 @@ struct RegistrationView: View {
             .foregroundColor(.white)
             .cornerRadius(10)
             .disabled(viewModel.role.isEmpty)
+            .accessibilityIdentifier("RegisterButton") // Accessibility Identifier
 
             if let message = viewModel.message {
                 Text(message)
                     .foregroundColor(.green)
                     .padding()
+                    .accessibilityIdentifier("MessageLabel") // Accessibility Identifier
             }
 
             if viewModel.isLoading {
                 ProgressView()
+                    .accessibilityIdentifier("LoadingProgressView") // Accessibility Identifier
             }
         }
         .navigationDestination(isPresented: $viewModel.isAuthenticated) {
@@ -67,3 +66,4 @@ struct RegistrationView: View {
         }
     }
 }
+
