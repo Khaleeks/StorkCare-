@@ -20,6 +20,7 @@ class ScheduleTelehealthViewModel: ObservableObject {
     @Published var noSlotsAvailable: Bool = false
     @Published var providerUnavailable: Bool = false
     
+    
     let providers = ["Dr. Smith", "Dr. Johnson", "Dr. Lee"]
     let allAvailableSlots: [String: [String]] = [
         "Dr. Smith": ["9:00 AM", "10:30 AM", "1:00 PM", "3:00 PM"],
