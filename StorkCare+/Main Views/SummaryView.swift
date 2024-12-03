@@ -3,7 +3,7 @@ import SwiftUI
 struct SummaryView: View {
     @Binding var medications: [Medication]
     @ObservedObject var viewModel: SummaryViewModel
-    @Environment(\.dismiss) private var dismiss // Dismiss action
+    @Binding var path: NavigationPath // Use shared NavigationPath to reset navigation
 
     var body: some View {
         VStack(spacing: 20) {
@@ -25,7 +25,8 @@ struct SummaryView: View {
                 .font(.headline)
 
             Button("Done") {
-                dismiss() // This will pop back to ContentView
+                path.removeLast(path.count) // Clear the navigation stack
+                path.append("ContentView") // Navigate directly to ContentView
             }
             .padding()
             .background(Color.green)
