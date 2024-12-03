@@ -87,13 +87,7 @@ class ProviderAvailabilityViewModel: ObservableObject {
             .setData(availabilityData) { error in
                 DispatchQueue.main.async {
                     self.isLoading = false
-                    if let error = error {
-                        self.message = "Error: Failed to save availability"
-                        print(error.localizedDescription)
-                    } else {
-                        self.message = "Availability updated successfully!"
-                        self.selectedTimeSlots.removeAll()  // Clear selections after success
-                    }
+                    
                 }
             }
     }

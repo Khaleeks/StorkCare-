@@ -1,62 +1,57 @@
-//
-//  ScheduleTelehealthViewModel.swift
-//  StorkCare+
-//
-//  Created by Khaleeqa Garrett on 11/13/24.
-//
-
-
-// ScheduleTelehealthViewModel.swift
 import SwiftUI
-import Combine
+import FirebaseFirestore
 
 class ScheduleTelehealthViewModel: ObservableObject {
-    @Published var selectedSlot: String = ""
-    @Published var selectedProvider: String = ""
-    @Published var selectedDate: Date = Date()
-    @Published var confirmationMessage: String = ""
-    @Published var showRescheduleOptions: Bool = false
+    @Published var selectedDate = Date()
+    @Published var selectedProvider = ""
+    @Published var selectedSlot = ""
+    @Published var providers: [String] = ["Dr. Lee", "Dr. Gonzalez", "Dr. Johnson"] // Example list
     @Published var availableSlots: [String] = []
-    @Published var noSlotsAvailable: Bool = false
-    @Published var providerUnavailable: Bool = false
-    
-    
-    let providers = ["Dr. Smith", "Dr. Johnson", "Dr. Lee"]
-    let allAvailableSlots: [String: [String]] = [
-        "Dr. Smith": ["9:00 AM", "10:30 AM", "1:00 PM", "3:00 PM"],
-        "Dr. Johnson": ["10:00 AM", "11:30 AM", "2:00 PM"],
-        "Dr. Lee": []
-    ]
-    
+    @Published var providerUnavailable = false
+    @Published var noSlotsAvailable = false
+    @Published var confirmationMessage = ""
+    @Published var showRescheduleOptions = false
+
+    private var db = Firestore.firestore()
+
+    // Load available slots for a selected provider
     func loadAvailableSlots(for provider: String) {
-        if let slots = allAvailableSlots[provider] {
-            availableSlots = slots
-            noSlotsAvailable = slots.isEmpty && provider != "Dr. Lee"
-            providerUnavailable = provider == "Dr. Lee" && slots.isEmpty
-        }
+        // Fetch available slots from Firestore or API
+        // Here, we just simulate some slots
+        availableSlots = ["10:00 AM", "2:00 PM", "4:00 PM"]
+        providerUnavailable = false
+        noSlotsAvailable = availableSlots.isEmpty
     }
-    
+
+    // Confirm appointment (hardcoded to always be successful)
     func confirmAppointment() {
-        if selectedSlot.isEmpty {
-            confirmationMessage = "Please select a time slot."
-        } else {
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateStyle = .medium
-            let formattedDate = dateFormatter.string(from: selectedDate)
-            
-            confirmationMessage = "Appointment confirmed with \(selectedProvider) on \(formattedDate) at \(selectedSlot)."
-            showRescheduleOptions = true
-            sendNotification()
+        guard !selectedSlot.isEmpty, !selectedProvider.isEmpty else {
+            return
+        }
+
+        // Simulate saving the appointment to Firebase Firestore
+        // You can still keep the structure to mimic the database interaction
+        // but skip the actual database call.
+        
+        let appointmentData: [String: Any] = [
+            "date": selectedDate,
+            "provider": selectedProvider,
+            "timeSlot": selectedSlot,
+            "userID": "user123", // Replace with the actual user ID
+            "timestamp": Timestamp(date: Date())
+        ]
+        
+        // Simulating a successful save to Firebase
+        // In reality, you would call Firestore methods here.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { // Simulating delay
+            self.confirmationMessage = "Your appointment has been scheduled!"
+            self.showRescheduleOptions = false
         }
     }
-    
+
+    // Reschedule appointment (example functionality)
     func rescheduleAppointment() {
-        confirmationMessage = ""
-        selectedSlot = ""
-        showRescheduleOptions = false
-    }
-    
-    private func sendNotification() {
-        print("Notification sent to user and provider.")
+        // Add rescheduling logic here
+        self.confirmationMessage = "Rescheduled!"
     }
 }
