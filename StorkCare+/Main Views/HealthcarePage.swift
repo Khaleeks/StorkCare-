@@ -1,62 +1,64 @@
-//
-//  HealthcarePage.swift
-//  StorkCare+
-//
-//  Created by Bamlak T on 11/7/24.
-//
-
 import SwiftUI
 
-
 struct HealthcarePage: View {
-    @ObservedObject var viewModel: HealthcarePageViewModel
-    var uid: String
-
-    init(uid: String, viewModel: HealthcarePageViewModel = HealthcarePageViewModel()) {
-        self.uid = uid
-        self.viewModel = viewModel
-    }
+    let uid: String
+    @StateObject private var viewModel: HealthcarePageViewModel = HealthcarePageViewModel()
+    
     var body: some View {
-        VStack {
+        VStack(spacing: 20) {
             Text("Healthcare Provider Onboarding")
                 .font(.largeTitle)
-                .lineLimit(1)
                 .padding()
-                .tag(1) // Tag for title text
             
-            TextField("Gender", text: $viewModel.gender)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
+            if viewModel.isLoading {
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle())
+                    .scaleEffect(1.5)
+            } else {
+                Form {
+                    Section(header: Text("Personal Information")) {
+                        TextField("Gender", text: $viewModel.gender)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                        
+                        TextField("Occupation", text: $viewModel.occupation)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                        
+                        TextField("Place of Work", text: $viewModel.placeOfWork)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                    }
+                }
+                
+                Button(action: {
+                    viewModel.saveHealthcareProviderData(uid: uid)
+                }) {
+                    if viewModel.isLoading {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                    } else {
+                        Text("Complete Onboarding")
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.pink)
+                .foregroundColor(.white)
+                .cornerRadius(10)
                 .padding(.horizontal)
-                .tag(2) // Tag for gender TextField
-            
-            TextField("Occupation", text: $viewModel.occupation)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding(.horizontal)
-                .tag(3) // Tag for occupation TextField
-            
-            TextField("Place of Work", text: $viewModel.placeOfWork)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding(.horizontal)
-                .tag(4) // Tag for place of work TextField
-            
-            Button("Complete Onboarding") {
-                viewModel.saveHealthcareProviderData(uid: uid)
+                .disabled(viewModel.isLoading)
             }
-            .padding()
-            .background(Color.pink)
-            .foregroundColor(.white)
-            .cornerRadius(10)
-            .tag(5) // Tag for Complete Onboarding button
             
             if let message = viewModel.message {
                 Text(message)
                     .foregroundColor(viewModel.isOnboardingComplete ? .green : .red)
                     .padding()
-                    .tag(6) // Tag for message text
             }
         }
+        .padding()
         .navigationDestination(isPresented: $viewModel.isOnboardingComplete) {
-            ContentView() // Navigate to the main features page when onboarding is complete
+            ContentView()
+        }
+        .onAppear {
+            viewModel.loadHealthcareProviderData(uid: uid)
         }
     }
 }

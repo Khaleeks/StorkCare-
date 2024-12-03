@@ -10,11 +10,11 @@ class RegistrationViewModel: ObservableObject {
     @Published var message: String? = nil
     @Published var isAuthenticated: Bool = false
     @Published var isLoading: Bool = false
+    @Published var uid: String = ""
 
     private let db = Firestore.firestore()
 
     func validateEmail() -> Bool {
-        // Simple email regex validation
         let emailRegEx = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
         let emailPred = NSPredicate(format: "SELF MATCHES %@", emailRegEx)
         return emailPred.evaluate(with: email)
@@ -25,9 +25,6 @@ class RegistrationViewModel: ObservableObject {
         let passwordPredicate = NSPredicate(format: "SELF MATCHES %@", passwordRegex)
         return passwordPredicate.evaluate(with: password)
     }
-
-
-
 
     func registerUser() {
         if !validateEmail() {
@@ -48,24 +45,47 @@ class RegistrationViewModel: ObservableObject {
             return
         }
 
-        // Simulate successful registration
-        isAuthenticated = true
-        message = "Registration successful!"
+        isLoading = true
+        
+        Auth.auth().createUser(withEmail: email, password: password) { [weak self] result, error in
+            guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                self.isLoading = false
+                
+                if let error = error {
+                    self.message = "Registration failed: \(error.localizedDescription)"
+                    self.isAuthenticated = false
+                    return
+                }
+                
+                if let user = result?.user {
+                    self.uid = user.uid
+                    self.saveUserData(uid: user.uid, email: self.email, role: self.role)
+                }
+            }
+        }
     }
 
-
     private func saveUserData(uid: String, email: String, role: String) {
-        db.collection("users").document(uid).setData([
+        let userData: [String: Any] = [
             "email": email,
             "role": role,
-            "isOnboarded": false
-        ]) { error in
-            if let error = error {
-                self.message = "Failed to save user data: \(error.localizedDescription)"
-                self.isAuthenticated = false
-            } else {
-                self.message = "Registration successful!"
-                self.isAuthenticated = true
+            "isOnboarded": false,
+            "createdAt": FieldValue.serverTimestamp()
+        ]
+
+        db.collection("users").document(uid).setData(userData) { [weak self] error in
+            guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                if let error = error {
+                    self.message = "Failed to save user data: \(error.localizedDescription)"
+                    self.isAuthenticated = false
+                } else {
+                    self.message = "Registration successful!"
+                    self.isAuthenticated = true
+                }
             }
         }
     }

@@ -1,19 +1,16 @@
-//
-//  PregnantWomanPage.swift
-//  StorkCare+
-//
-//  Created by Bamlak T on 11/7/24.
-//
-
 import SwiftUI
-struct PregnantWomanPage: View {
-    @ObservedObject var viewModel: PregnantWomanViewModel
-    let uid: String
 
+struct PregnantWomanPage: View {
+    let uid: String
+    @StateObject private var viewModel = PregnantWomanViewModel()
+    @State private var showSexPicker = false
+    @State private var showHeightPicker = false
+    @State private var showWeightPicker = false
+    @State private var showDatePicker = false
+    @State private var showPregnancyDatePicker = false
+    
     var body: some View {
         VStack(spacing: 15) {
-            Spacer().frame(height: 20)
-
             Text("Personalized Health Data")
                 .font(.largeTitle)
                 .bold()
@@ -21,243 +18,200 @@ struct PregnantWomanPage: View {
                 .frame(maxWidth: .infinity, alignment: .center)
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
-
+            
             Text("This information ensures that your health data is as accurate as possible. This information is only shared with your healthcare provider.")
                 .font(.body)
                 .multilineTextAlignment(.center)
                 .padding(.bottom)
-                .frame(maxWidth: .infinity, alignment: .center)
-
+            
             Form {
                 Section(header: Text("Personal Info")) {
                     HStack {
-                        Text("Name").bold()
+                        Text("Name")
+                            .bold()
                         Spacer()
                         TextField("Enter your name", text: $viewModel.name)
                             .multilineTextAlignment(.trailing)
-                            .tag(1) // Correct tag for the name field
-                            .accessibilityLabel("Name")
                     }
-
+                    
                     HStack {
-                        Text("Sex").bold()
+                        Text("Sex")
+                            .bold()
                         Spacer()
                         Text(viewModel.selectedSex.isEmpty ? "Select" : viewModel.selectedSex)
                             .foregroundColor(.black)
                             .onTapGesture {
-                                viewModel.showSexPicker.toggle()
+                                showSexPicker = true
                             }
                     }
-
+                    
                     HStack {
-                        Text("Date of Birth").bold()
+                        Text("Date of Birth")
+                            .bold()
                         Spacer()
                         Text(viewModel.dateFormatted(date: viewModel.dateOfBirth))
-                            .foregroundColor(.black)
                             .onTapGesture {
-                                viewModel.showDatePicker.toggle()
+                                showDatePicker = true
                             }
                     }
                 }
-
+                
                 Section(header: Text("Pregnancy Info")) {
                     HStack {
-                        Text("Pregnancy Start Date").bold()
+                        Text("Pregnancy Start Date")
+                            .bold()
                         Spacer()
                         Text(viewModel.dateFormatted(date: viewModel.pregnancyStartDate))
-                            .foregroundColor(.black)
                             .onTapGesture {
-                                viewModel.showPregnancyDatePicker.toggle()
+                                showPregnancyDatePicker = true
                             }
                     }
-
+                    
                     VStack(alignment: .leading) {
-                        Text("Past Medical History").bold()
-                        TextField("Enter any relevant medical history", text: $viewModel.medicalHistory)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                        Text("Medical History")
+                            .bold()
+                        TextEditor(text: $viewModel.medicalHistory)
+                            .frame(height: 100)
                     }
                 }
-
+                
                 Section(header: Text("Physical Info")) {
                     HStack {
-                        Text("Height (cm)").bold()
+                        Text("Height (cm)")
+                            .bold()
                         Spacer()
                         Text("\(viewModel.selectedHeight) cm")
-                            .foregroundColor(.black)
                             .onTapGesture {
-                                viewModel.showHeightPicker.toggle()
+                                showHeightPicker = true
                             }
-                            .tag(2) // Tag for height picker toggle button
                     }
-
+                    
                     HStack {
-                        Text("Weight (kg)").bold()
+                        Text("Weight (kg)")
+                            .bold()
                         Spacer()
                         Text("\(viewModel.selectedWeight) kg")
-                            .foregroundColor(.black)
                             .onTapGesture {
-                                viewModel.showWeightPicker.toggle()
+                                showWeightPicker = true
                             }
                     }
                 }
             }
-            .padding()
-
-            Button("Continue") {
+            
+            Button(action: {
                 viewModel.savePregnantWomanData(uid: uid)
+            }) {
+                Text("Complete Profile")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.pink)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
             }
-            .bold()
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color.pink)
-            .foregroundColor(.white)
-            .cornerRadius(10)
             .padding(.horizontal)
-            .accessibilityLabel("Continue")
+            
+            if let message = viewModel.message {
+                Text(message)
+                    .foregroundColor(viewModel.isProfileCreated ? .green : .red)
+                    .padding()
+            }
         }
         .navigationDestination(isPresented: $viewModel.isProfileCreated) {
-            ContentView() // Navigate to main features page
+            ContentView()
         }
-        .padding()
-
-        // Sex Picker Bottom Sheet
-        .sheet(isPresented: $viewModel.showSexPicker) {
-            VStack {
-                Picker("Sex", selection: $viewModel.selectedSex) {
-                    Text("Male").tag("Male")
-                    Text("Female").tag("Female")
-                    Text("Nonbinary").tag("Nonbinary")
-                }
-                .pickerStyle(.wheel)
-
-                Button(action: {
-                    viewModel.showSexPicker = false
-                }) {
-                    Text("Done")
-                        .bold()
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.pink)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                        .padding(.horizontal)
-                }
-            }
-            .padding()
+        .sheet(isPresented: $showSexPicker) {
+            pickerView(title: "Select Sex", selection: $viewModel.selectedSex, options: ["Male", "Female", "Other"])
         }
-
-        // Height Picker Bottom Sheet
-        .sheet(isPresented: $viewModel.showHeightPicker) {
-            VStack {
-                Picker("Height", selection: $viewModel.selectedHeight) {
-                    ForEach(30...275, id: \.self) { height in
-                        Text("\(height) cm").tag(height)
-                    }
-                }
-                .pickerStyle(.wheel)
-                .tag(3) // Tag for height picker sheet
-                .accessibilityIdentifier("HeightPicker")
-
-                Button(action: {
-                    viewModel.showHeightPicker = false
-                }) {
-                    Text("Done")
-                        .bold()
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.pink)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                        .padding(.horizontal)
-                }
-            }
-            .padding()
+        .sheet(isPresented: $showHeightPicker) {
+            heightPickerView
         }
-
-        // Weight Picker Bottom Sheet
-        .sheet(isPresented: $viewModel.showWeightPicker) {
-            VStack {
-                Picker("Weight", selection: $viewModel.selectedWeight) {
-                    ForEach(0...454, id: \.self) { weight in
-                        Text("\(weight) kg").tag(weight)
-                    }
-                }
-                .pickerStyle(.wheel)
-                .tag(4) // Update this to ensure unique tags
-                .accessibilityIdentifier("WeightPicker")
-
-                Button(action: {
-                    viewModel.showWeightPicker = false
-                }) {
-                    Text("Done")
-                        .bold()
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.pink)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                        .padding(.horizontal)
-                }
-            }
-            .padding()
+        .sheet(isPresented: $showWeightPicker) {
+            weightPickerView
         }
-
-        // Date Picker Bottom Sheet for Date of Birth
-        .sheet(isPresented: $viewModel.showDatePicker) {
-            VStack {
-                DatePicker("Select your date of birth", selection: $viewModel.dateOfBirth, displayedComponents: .date)
-                    .datePickerStyle(.graphical)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-
-                Button(action: {
-                    viewModel.showDatePicker = false
-                }) {
-                    Text("Done")
-                        .bold()
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.pink)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                        .padding(.horizontal)
-                }
-            }
-            .padding()
-            .background(Color.white)
-            .edgesIgnoringSafeArea(.all)
+        .sheet(isPresented: $showDatePicker) {
+            datePickerView(title: "Date of Birth", selection: $viewModel.dateOfBirth)
         }
-
-        // Date Picker Bottom Sheet for Pregnancy Start Date
-        .sheet(isPresented: $viewModel.showPregnancyDatePicker) {
-            VStack {
-                DatePicker("Select pregnancy start date", selection: $viewModel.pregnancyStartDate, displayedComponents: .date)
-                    .datePickerStyle(.graphical)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-
-                Button(action: {
-                    viewModel.showPregnancyDatePicker = false
-                }) {
-                    Text("Done")
-                        .bold()
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.pink)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                        .padding(.horizontal)
-                }
-            }
-            .padding()
-            .background(Color.white)
-            .edgesIgnoringSafeArea(.all)
+        .sheet(isPresented: $showPregnancyDatePicker) {
+            datePickerView(title: "Pregnancy Start Date", selection: $viewModel.pregnancyStartDate)
+        }
+        .onAppear {
+            viewModel.loadUserProfile(uid: uid)
         }
     }
-}
-
-struct PregnantWomanPage_Previews: PreviewProvider {
-    static var previews: some View {
-        PregnantWomanPage(viewModel: PregnantWomanViewModel(), uid: "sampleUID")
+    
+    // Helper Views
+    private func pickerView(title: String, selection: Binding<String>, options: [String]) -> some View {
+        VStack {
+            Text(title)
+                .font(.headline)
+                .padding()
+            
+            Picker(title, selection: selection) {
+                ForEach(options, id: \.self) { option in
+                    Text(option).tag(option)
+                }
+            }
+            .pickerStyle(.wheel)
+            
+            Button("Done") {
+                if title == "Select Sex" {
+                    showSexPicker = false
+                }
+            }
+            .padding()
+        }
+    }
+    
+    private var heightPickerView: some View {
+        VStack {
+            Picker("Height", selection: $viewModel.selectedHeight) {
+                ForEach(120...220, id: \.self) { height in
+                    Text("\(height) cm").tag(height)
+                }
+            }
+            .pickerStyle(.wheel)
+            
+            Button("Done") {
+                showHeightPicker = false
+            }
+            .padding()
+        }
+    }
+    
+    private var weightPickerView: some View {
+        VStack {
+            Picker("Weight", selection: $viewModel.selectedWeight) {
+                ForEach(30...200, id: \.self) { weight in
+                    Text("\(weight) kg").tag(weight)
+                }
+            }
+            .pickerStyle(.wheel)
+            
+            Button("Done") {
+                showWeightPicker = false
+            }
+            .padding()
+        }
+    }
+    
+    private func datePickerView(title: String, selection: Binding<Date>) -> some View {
+        VStack {
+            Text(title)
+                .font(.headline)
+                .padding()
+            
+            DatePicker(title, selection: selection, displayedComponents: .date)
+                .datePickerStyle(.graphical)
+                .padding()
+            
+            Button("Done") {
+                if title == "Date of Birth" {
+                    showDatePicker = false
+                } else {
+                    showPregnancyDatePicker = false
+                }
+            }
+            .padding()
+        }
     }
 }

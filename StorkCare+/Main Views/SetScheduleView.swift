@@ -2,107 +2,120 @@ import SwiftUI
 
 struct SetScheduleView: View {
     @Binding var medications: [Medication]
-    @ObservedObject var viewModel: SetScheduleViewModel
-
-    @State private var navigateToSummary = false
-
+    @StateObject private var viewModel = SetScheduleViewModel()
+    @State private var scheduleFrequency: String = "Every day"
+    @State private var specificTimes: [String] = []
+    @State private var capsuleQuantity: String = "1 capsule"
+    @State private var startDate: Date = Date()
+    @State private var endDate: Date = Date()
+    @State private var showSummary = false
+    @State private var isAddingTime = false
+    @State private var newTime = Date()
+    @State private var path: [String] = [] // Add navigation path state
+    
+    let frequencyOptions = ["Every day", "On a cyclical schedule", "On specific days of the week", "As needed"]
+    
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 20) {
-                Text("Set a Schedule")
-                    .font(.title)
-                    .padding()
-
-                Group {
-                    Text("When Will You Take This?")
-                        .font(.headline)
-                    Picker("Change Frequency", selection: $viewModel.scheduleFrequency) {
-                        ForEach(viewModel.frequencyOptions, id: \.self) { option in
-                            Text(option)
-                        }
+        VStack(spacing: 20) {
+            Text("Set a Schedule")
+                .font(.title)
+                .padding()
+            
+            Group {
+                // Frequency Section
+                Text("When Will You Take This?")
+                    .font(.headline)
+                Picker("Change Frequency", selection: $scheduleFrequency) {
+                    ForEach(frequencyOptions, id: \.self) { option in
+                        Text(option)
                     }
-                    .pickerStyle(MenuPickerStyle())
-                    .padding()
-
-                    Text("At What Time?")
-                        .font(.headline)
-                    VStack(alignment: .leading) {
-                        ForEach(viewModel.specificTimes, id: \.self) { time in
-                            HStack {
-                                Text(time)
-                                Spacer()
-                                Text(viewModel.capsuleQuantity)
-                            }
-                            .padding(.vertical, 2)
-                        }
-                        Button("Add Time") {
-                            viewModel.isAddingTime.toggle()
-                        }
-                    }
-                    .padding()
-                    .sheet(isPresented: $viewModel.isAddingTime) {
-                        VStack {
-                            DatePicker("Select Time", selection: $viewModel.newTime, displayedComponents: .hourAndMinute)
-                                .datePickerStyle(WheelDatePickerStyle())
-                            Button("Done") {
-                                viewModel.addTime(viewModel.newTime)
-                                viewModel.isAddingTime = false
-                            }
-                            .padding()
-                        }
-                    }
-
-                    Text("Duration")
-                        .font(.headline)
-                    HStack {
-                        VStack {
-                            Text("Start Date")
-                            DatePicker("Start Date", selection: $viewModel.startDate, displayedComponents: .date)
-                                .labelsHidden()
-                        }
-                        VStack {
-                            Text("End Date")
-                            DatePicker("End Date", selection: $viewModel.endDate, displayedComponents: .date)
-                                .labelsHidden()
-                        }
-                    }
-                    .padding()
                 }
-
-                Button("Next") {
-                    viewModel.onNextButtonTapped()
-                    navigateToSummary = true
+                .pickerStyle(MenuPickerStyle())
+                .padding()
+                
+                // Time Section
+                Text("At What Time?")
+                    .font(.headline)
+                VStack(alignment: .leading) {
+                    ForEach(specificTimes, id: \.self) { time in
+                        HStack {
+                            Text(time)
+                            Spacer()
+                            Text(capsuleQuantity)
+                        }
+                        .padding(.vertical, 2)
+                    }
+                    Button("Add Time") {
+                        isAddingTime.toggle()
+                    }
                 }
                 .padding()
-                .background(viewModel.showErrorMessage ? Color.red : Color.green)
-                .foregroundColor(.white)
-                .cornerRadius(10)
-                .disabled(viewModel.specificTimes.isEmpty)
-
-                if viewModel.showErrorMessage {
-                    Text("Please make sure all fields are filled correctly.")
-                        .foregroundColor(.red)
-                        .padding()
+                
+                // Duration Section
+                Text("Duration")
+                    .font(.headline)
+                HStack {
+                    VStack {
+                        Text("Start Date")
+                        DatePicker("Start Date", selection: $startDate, displayedComponents: .date)
+                            .labelsHidden()
+                    }
+                    VStack {
+                        Text("End Date")
+                        DatePicker("End Date", selection: $endDate, displayedComponents: .date)
+                            .labelsHidden()
+                    }
                 }
-
-                NavigationLink(
-                    destination: SummaryView(
-                        medications: $medications,
-                        viewModel: SummaryViewModel(
-                            medications: $medications,
-                            scheduleFrequency: viewModel.scheduleFrequency,
-                            specificTimes: viewModel.specificTimes,
-                            capsuleQuantity: viewModel.capsuleQuantity,
-                            startDate: viewModel.startDate,
-                            endDate: viewModel.endDate
-                        )
-                    ),
-                    isActive: $navigateToSummary
-                ) {
-                    EmptyView()
-                }
+                .padding()
+            }
+            
+            // Next Button to Summary
+            Button("Next") {
+                showSummary = true
             }
             .padding()
+            .background(Color.green)
+            .foregroundColor(.white)
+            .cornerRadius(10)
         }
+        .padding()
+        .navigationDestination(isPresented: $showSummary) {
+            let summaryViewModel = SummaryViewModel(
+                medications: $medications,
+                scheduleFrequency: scheduleFrequency,
+                specificTimes: specificTimes,
+                capsuleQuantity: capsuleQuantity,
+                startDate: startDate,
+                endDate: endDate
+            )
+            
+            SummaryView(
+                medications: $medications,
+                scheduleFrequency: scheduleFrequency,
+                specificTimes: specificTimes,
+                capsuleQuantity: capsuleQuantity,
+                startDate: startDate,
+                endDate: endDate,
+                viewModel: summaryViewModel,
+                path: $path
+            )
+        }
+        .sheet(isPresented: $isAddingTime) {
+            VStack {
+                DatePicker("Select Time", selection: $newTime, displayedComponents: .hourAndMinute)
+                    .datePickerStyle(WheelDatePickerStyle())
+                Button("Done") {
+                    specificTimes.append(formattedTime(newTime))
+                    isAddingTime = false
+                }
+                .padding()
+            }
+        }
+    }
+    
+    private func formattedTime(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
     }
 }

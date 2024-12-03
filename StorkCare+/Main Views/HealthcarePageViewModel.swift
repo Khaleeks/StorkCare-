@@ -1,21 +1,24 @@
 import Foundation
 import FirebaseFirestore
 
-// Protocol for Firestore service to make it easier to mock in tests
 protocol FirestoreServiceProtocol {
     func saveHealthcareProviderData(uid: String, gender: String, occupation: String, placeOfWork: String, completion: @escaping (Result<Void, Error>) -> Void)
+    func loadHealthcareProviderData(uid: String, completion: @escaping (Result<[String: Any], Error>) -> Void)
 }
 
-// Default FirestoreService that communicates with the Firestore database
 class FirestoreService: FirestoreServiceProtocol {
+    private let db = Firestore.firestore()
+    
     func saveHealthcareProviderData(uid: String, gender: String, occupation: String, placeOfWork: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        let db = Firestore.firestore()
-        db.collection("users").document(uid).updateData([
+        let data: [String: Any] = [
             "gender": gender,
             "occupation": occupation,
             "placeOfWork": placeOfWork,
-            "isOnboarded": true
-        ]) { error in
+            "isOnboarded": true,
+            "lastUpdated": FieldValue.serverTimestamp()
+        ]
+        
+        db.collection("users").document(uid).updateData(data) { error in
             if let error = error {
                 completion(.failure(error))
             } else {
@@ -23,19 +26,33 @@ class FirestoreService: FirestoreServiceProtocol {
             }
         }
     }
+    
+    func loadHealthcareProviderData(uid: String, completion: @escaping (Result<[String: Any], Error>) -> Void) {
+        db.collection("users").document(uid).getDocument { snapshot, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            if let data = snapshot?.data() {
+                completion(.success(data))
+            } else {
+                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "No data found"])))
+            }
+        }
+    }
 }
 
-// ViewModel for HealthcarePage
 class HealthcarePageViewModel: ObservableObject {
     @Published var gender: String = ""
     @Published var occupation: String = ""
     @Published var placeOfWork: String = ""
     @Published var message: String? = nil
     @Published var isOnboardingComplete: Bool = false
+    @Published var isLoading: Bool = false
 
     private var firestoreService: FirestoreServiceProtocol
 
-    // Injecting the FirestoreService so that we can mock it in the tests
     init(firestoreService: FirestoreServiceProtocol = FirestoreService()) {
         self.firestoreService = firestoreService
     }
@@ -47,11 +64,17 @@ class HealthcarePageViewModel: ObservableObject {
             return
         }
         
-        firestoreService.saveHealthcareProviderData(uid: uid, gender: gender, occupation: occupation, placeOfWork: placeOfWork) { result in
+        isLoading = true
+        
+        firestoreService.saveHealthcareProviderData(uid: uid, gender: gender, occupation: occupation, placeOfWork: placeOfWork) { [weak self] result in
+            guard let self = self else { return }
+            
             DispatchQueue.main.async {
+                self.isLoading = false
+                
                 switch result {
                 case .success:
-                    self.message = "Onboarding complete!"
+                    self.message = "Profile saved successfully!"
                     self.isOnboardingComplete = true
                 case .failure(let error):
                     self.message = "Failed to save data: \(error.localizedDescription)"
@@ -60,8 +83,26 @@ class HealthcarePageViewModel: ObservableObject {
             }
         }
     }
-
-
     
-    
+    func loadHealthcareProviderData(uid: String) {
+        isLoading = true
+        
+        firestoreService.loadHealthcareProviderData(uid: uid) { [weak self] result in
+            guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                self.isLoading = false
+                
+                switch result {
+                case .success(let data):
+                    self.gender = data["gender"] as? String ?? ""
+                    self.occupation = data["occupation"] as? String ?? ""
+                    self.placeOfWork = data["placeOfWork"] as? String ?? ""
+                    self.isOnboardingComplete = data["isOnboarded"] as? Bool ?? false
+                case .failure(let error):
+                    self.message = "Failed to load data: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
 }

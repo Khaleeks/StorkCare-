@@ -2,8 +2,13 @@ import SwiftUI
 
 struct SummaryView: View {
     @Binding var medications: [Medication]
+    let scheduleFrequency: String
+    let specificTimes: [String]
+    let capsuleQuantity: String
+    let startDate: Date
+    let endDate: Date
     @ObservedObject var viewModel: SummaryViewModel
-    @Binding var path: NavigationPath // Use shared NavigationPath to reset navigation
+    @Binding var path: [String] // Use shared NavigationPath to reset navigation
 
     var body: some View {
         VStack(spacing: 20) {

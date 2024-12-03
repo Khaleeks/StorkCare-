@@ -1,68 +1,72 @@
 import SwiftUI
 
 struct AddMedicationView: View {
-    @Binding var medications: [Medication] // Binding to the medications list
-    @StateObject private var viewModel: AddMedicationViewModel
-
-    // Initialize the view model with medications
-    init(medications: Binding<[Medication]>) {
-        _medications = medications
-        _viewModel = StateObject(wrappedValue: AddMedicationViewModel(medications: medications.wrappedValue))
-    }
+    @Binding var medications: [Medication]
+    @StateObject private var viewModel = AddMedicationViewModel()
+    @State private var medicationName: String = ""
+    @State private var selectedMedicationType: String = "Capsule"
+    @State private var showAlert = false
+    @State private var alertMessage = ""
+    @State private var showingSetSchedule = false // State for navigation
+    
+    let medicationTypes = ["Capsule", "Tablet", "Liquid", "Topical", "Ointment", "Injection", "Spray"]
     
     var body: some View {
         VStack(spacing: 20) {
             Text("Add Medication")
                 .font(.title)
                 .padding()
-
-            // Bold label for medication name
+            
             Text("Medication Name:")
                 .font(.headline)
                 .bold()
                 .padding(.top)
-
-            // Input for medication name
-            TextField("Enter Medication Name", text: $viewModel.medicationName)
+            
+            TextField("Enter Medication Name", text: $medicationName)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
-
-            // Medication type selection
+            
             Text("Choose the Medication Type:")
                 .font(.headline)
                 .bold()
                 .padding(.top)
-
-            // Access medication types from the view model
-            Picker("Medication Type", selection: $viewModel.selectedMedicationType) {
-                ForEach(viewModel.medicationTypes, id: \.self) { type in
+            
+            Picker("Medication Type", selection: $selectedMedicationType) {
+                ForEach(medicationTypes, id: \.self) { type in
                     Text(type)
                 }
             }
             .pickerStyle(MenuPickerStyle())
             .padding()
-
-            // Next button to navigate to set schedule view
+            
             Button("Next") {
-                viewModel.onNextButtonTapped()
+                if medicationName.isEmpty {
+                    showAlert(message: "Please enter the medication name.")
+                } else {
+                    showingSetSchedule = true
+                }
             }
             .padding()
             .background(Color.green)
             .foregroundColor(.white)
             .cornerRadius(10)
-            .alert(isPresented: $viewModel.showAlert) {
-                Alert(title: Text("Error"), message: Text(viewModel.alertMessage), dismissButton: .default(Text("OK")))
-            }
-            // Navigation to set schedule view
-            .navigationDestination(isPresented: $viewModel.showingSetSchedule) {
-                SetScheduleView(medications: $medications, viewModel: SetScheduleViewModel()) // Pass medications and viewModel to SetScheduleView
+            
+            .alert(isPresented: $showAlert) {
+                Alert(
+                    title: Text("Error"),
+                    message: Text(alertMessage),
+                    dismissButton: .default(Text("OK"))
+                )
             }
         }
         .padding()
+        .navigationDestination(isPresented: $showingSetSchedule) {
+            SetScheduleView(medications: $medications)
+        }
     }
-}
-
-// Preview
-#Preview {
-    AddMedicationView(medications: .constant([]))
+    
+    private func showAlert(message: String) {
+        alertMessage = message
+        showAlert = true
+    }
 }
