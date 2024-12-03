@@ -93,3 +93,7 @@ struct ScheduleTelehealthView: View {
         .shadow(radius: 5)
     }
 }
+
+#Preview {
+    ScheduleTelehealthView()
+}
