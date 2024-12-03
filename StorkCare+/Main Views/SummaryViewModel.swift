@@ -25,3 +25,4 @@ class SummaryViewModel: ObservableObject {
         self.endDate = endDate
     }
 }
+
