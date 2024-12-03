@@ -3,13 +3,14 @@ import FirebaseFirestore
 
 struct ScheduleTelehealthView: View {
     @StateObject var viewModel = ScheduleTelehealthViewModel()
-    
+    @State private var shareHealthDataProfile: String = "No" // Track user's selection
+
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
                 // Title Section
                 VStack(spacing: 8) {
-                    Text("Schedule a Telehealth Consultation")
+                    Text("Schedule Consultation")
                         .font(.title)
                         .fontWeight(.bold)
                         .foregroundColor(.white)
@@ -153,6 +154,45 @@ struct ScheduleTelehealthView: View {
                     .frame(maxWidth: 600) // Center the button
                 }
             }
+            
+            // Ask if they want to share health data profile
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Would you like to share your health data profile with the provider?")
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+                
+                Picker("Share Health Data Profile?", selection: $shareHealthDataProfile) {
+                    Text("Yes").tag("Yes")
+                    Text("No").tag("No")
+                }
+                .pickerStyle(SegmentedPickerStyle())
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 15)
+                        .fill(Color.white)
+                        .shadow(radius: 5)
+                )
+                .padding(.horizontal)
+                .frame(maxWidth: 600) // Center the picker
+                
+                // Confirm Button for Health Data Sharing
+                Button(action: {
+                    // Handle confirmation logic for health data sharing here
+                    print("Health Data Sharing Selected: \(shareHealthDataProfile)")
+                }) {
+                    Text("Confirm Health Data Sharing")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.green)
+                        .foregroundColor(.white)
+                        .cornerRadius(20)
+                        .shadow(radius: 5)
+                }
+                .padding(.horizontal)
+                .frame(maxWidth: 600) // Center the button
+            }
+    
             .padding()
             .background(
                 Color(UIColor.systemGroupedBackground)
