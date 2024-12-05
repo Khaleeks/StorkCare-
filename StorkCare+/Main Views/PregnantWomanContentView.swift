@@ -1,18 +1,24 @@
+//
+//  PregnantWomanContentView.swift
+//  StorkCare+
+//
+//  Created by Bamlak T on 12/5/24.
+//
 import SwiftUI
+import FirebaseAuth
 
-struct ContentView: View {
-    @State internal var searchText: String = "" // State variable for the search bar
-    @State internal var medications: [Medication] = [] // State variable to hold medications
-
-    // Define the use cases with their names, icons, and colors
+struct PregnantWomanContentView: View {
+    @State private var searchText: String = ""
+    @State private var medications: [Medication] = []
+    @State private var isAuthenticated = true
+    @Environment(\.dismiss) private var dismiss
+    
     let useCases: [(title: String, icon: String, color: Color)] = [
         ("Track Baby Development", "chart.bar.fill", .pink),
         ("Schedule Telehealth Consultation", "video.fill", .purple),
-        ("Medication Reminder", "alarm.fill", .blue),
-        ("Provider Availability", "calendar", .green)
+        ("Medication Reminder", "alarm.fill", .blue)
     ]
     
-    // Filter use cases based on search text
     var filteredUseCases: [(title: String, icon: String, color: Color)] {
         searchText.isEmpty
             ? useCases
@@ -24,7 +30,7 @@ struct ContentView: View {
             VStack(spacing: 20) {
                 // Search Bar
                 HStack {
-                    TextField("Searc h...", text: $searchText)
+                    TextField("Search...", text: $searchText)
                         .padding(10)
                         .background(Color(.systemGray6))
                         .cornerRadius(10)
@@ -40,7 +46,7 @@ struct ContentView: View {
 
                 // Health Categories Title
                 Text("Health Categories")
-                    .font(.system(size: 36, weight: .bold)) // Adjusted font size for clarity
+                    .font(.system(size: 36, weight: .bold))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal)
 
@@ -57,35 +63,47 @@ struct ContentView: View {
                         .padding(.vertical, 10)
                     }
                 }
-                .listStyle(PlainListStyle()) // Cleaner list style
+                .listStyle(PlainListStyle())
             }
             .navigationTitle("StorkCare+")
             .navigationBarTitleDisplayMode(.inline)
-            .font(.system(size: 24, weight: .bold))
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding()
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: signOut) {
+                        Text("Sign Out")
+                            .foregroundColor(.red)
+                    }
+                }
+            }
         }
     }
-
-    // ViewBuilder for navigating to appropriate views based on selection
+    
+    private func signOut() {
+        do {
+            try Auth.auth().signOut()
+            isAuthenticated = false
+            // Reset navigation to root view
+            dismiss()
+        } catch {
+            print("Error signing out: \(error.localizedDescription)")
+        }
+    }
+    
     @ViewBuilder
-    internal func destinationView(for useCase: String) -> some View {
+    private func destinationView(for useCase: String) -> some View {
         switch useCase {
         case "Track Baby Development":
             TrackBabyDevelopmentView()
         case "Schedule Telehealth Consultation":
             ScheduleTelehealthView()
         case "Medication Reminder":
-            SetupMedicationView(medications: $medications) // Use the binding to medications
-        case "Provider Availability":
-            ProviderAvailabilityView()
+            SetupMedicationView(medications: $medications)
         default:
             Text("Unknown use case")
         }
     }
 }
 
-// Previews
 #Preview {
-    ContentView()
+    PregnantWomanContentView()
 }

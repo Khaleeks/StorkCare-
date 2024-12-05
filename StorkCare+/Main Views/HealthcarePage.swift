@@ -55,7 +55,7 @@ struct HealthcarePage: View {
         }
         .padding()
         .navigationDestination(isPresented: $viewModel.isOnboardingComplete) {
-            ContentView()
+            HealthcareContentView()
         }
         .onAppear {
             viewModel.loadHealthcareProviderData(uid: uid)

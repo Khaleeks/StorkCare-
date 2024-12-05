@@ -117,7 +117,7 @@ struct PregnantWomanPage: View {
             }
         }
         .navigationDestination(isPresented: $viewModel.isProfileCreated) {
-            ContentView()
+            PregnantWomanContentView()
         }
         .sheet(isPresented: $showSexPicker) {
             pickerView(title: "Select Sex", selection: $viewModel.selectedSex, options: ["Male", "Female", "Other"])

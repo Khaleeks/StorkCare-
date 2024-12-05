@@ -2,9 +2,10 @@ import SwiftUI
 import FirebaseCore
 import FirebaseAuth
 
+// Define the AppDelegate class
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication,
-                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+                    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         FirebaseApp.configure()
         return true
     }
@@ -20,20 +21,16 @@ struct StorkCare_App: App {
         WindowGroup {
             NavigationStack {
                 if isAuthenticated {
-                    ContentView()
+                    ContentRouterView()
                 } else {
                     IntroductionPage(isAuthenticated: $isAuthenticated)
-                        .onAppear {
-                            checkAuthenticationStatus()
-                        }
                 }
             }
-        }
-    }
-    
-    private func checkAuthenticationStatus() {
-        authListener = Auth.auth().addStateDidChangeListener { _, user in
-            isAuthenticated = user != nil
+            .onAppear {
+                authListener = Auth.auth().addStateDidChangeListener { _, user in
+                    isAuthenticated = user != nil
+                }
+            }
         }
     }
 }
