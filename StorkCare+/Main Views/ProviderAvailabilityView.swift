@@ -1,7 +1,9 @@
 import SwiftUI
+import FirebaseAuth
+import SwiftUI
 
 struct ProviderAvailabilityView: View {
-    @ObservedObject var viewModel = ProviderAvailabilityViewModel()
+    @StateObject var viewModel = ProviderAvailabilityViewModel() // Change to @StateObject
 
     let timeSlots = [
         "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
@@ -45,7 +47,7 @@ struct ProviderAvailabilityView: View {
                         Text("Available Time Slots")
                             .font(.headline)
                             .padding(.bottom, 5)
-                            .accessibilityIdentifier("TimeSlotsLabel") // Accessibility Identifier for Time Slots label
+                            .accessibilityIdentifier("TimeSlotsLabel")
                         
                         LazyVGrid(columns: [
                             GridItem(.flexible()),
@@ -59,7 +61,7 @@ struct ProviderAvailabilityView: View {
                                         toggleTimeSlot(time)
                                     }
                                 )
-                                .accessibilityIdentifier("TimeSlotButton-\(time)") // Accessibility Identifier for each time slot button
+                                .accessibilityIdentifier("TimeSlotButton-\(time)")
                             }
                         }
                     }
@@ -81,14 +83,14 @@ struct ProviderAvailabilityView: View {
                     }
                     .disabled(viewModel.selectedTimeSlots.isEmpty)
                     .padding(.horizontal)
-                    .accessibilityIdentifier("ConfirmButton") // Accessibility Identifier for the confirm button
+                    .accessibilityIdentifier("ConfirmButton")
                     
                     // MARK: - Message Section (Success/Error)
                     if let message = viewModel.message {
                         Text(message)
                             .foregroundColor(message.contains("Error") ? .red : .green)
                             .padding()
-                            .accessibilityIdentifier("MessageLabel") // Accessibility Identifier for the message label
+                            .accessibilityIdentifier("MessageLabel")
                     }
                     
                     Spacer()
@@ -137,7 +139,7 @@ struct ProviderInfoCard: View {
             Text(providerData.name)
                 .font(.title)
                 .bold()
-                .accessibilityIdentifier("ProviderName") // Accessibility Identifier for provider name
+                .accessibilityIdentifier("ProviderName")
             Text(providerData.occupation)
                 .font(.subheadline)
                 .foregroundColor(.gray)
@@ -149,7 +151,7 @@ struct ProviderInfoCard: View {
             Text(providerData.gender)
                 .font(.subheadline)
                 .foregroundColor(.gray)
-                .accessibilityIdentifier("ProviderGender") // Accessibility Identifier for provider gender
+                .accessibilityIdentifier("ProviderGender") 
         }
         .padding()
         .background(Color.white)
@@ -165,7 +167,7 @@ struct TimeSlotButton: View {
     var action: () -> Void
     
     var body: some View {
-        Button(action: action) {
+        Button(action: action) { // Use the action passed in from parent
             Text(time)
                 .padding()
                 .frame(maxWidth: .infinity)

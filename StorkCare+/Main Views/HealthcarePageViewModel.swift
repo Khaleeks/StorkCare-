@@ -4,11 +4,13 @@ import FirebaseFirestore
 protocol FirestoreServiceProtocol {
     func saveHealthcareProviderData(uid: String, gender: String, occupation: String, placeOfWork: String, completion: @escaping (Result<Void, Error>) -> Void)
     func loadHealthcareProviderData(uid: String, completion: @escaping (Result<[String: Any], Error>) -> Void)
+    func saveProviderAvailability(uid: String, date: String, timeSlots: [String], providerData: ProviderData, completion: @escaping (Result<Void, Error>) -> Void)
+    func loadProviderAvailability(uid: String, date: String, completion: @escaping (Result<[String], Error>) -> Void)
 }
 
 class FirestoreService: FirestoreServiceProtocol {
     private let db = Firestore.firestore()
-    
+
     func saveHealthcareProviderData(uid: String, gender: String, occupation: String, placeOfWork: String, completion: @escaping (Result<Void, Error>) -> Void) {
         let data: [String: Any] = [
             "gender": gender,
@@ -26,7 +28,7 @@ class FirestoreService: FirestoreServiceProtocol {
             }
         }
     }
-    
+
     func loadHealthcareProviderData(uid: String, completion: @escaping (Result<[String: Any], Error>) -> Void) {
         db.collection("users").document(uid).getDocument { snapshot, error in
             if let error = error {
@@ -41,7 +43,43 @@ class FirestoreService: FirestoreServiceProtocol {
             }
         }
     }
+
+    func saveProviderAvailability(uid: String, date: String, timeSlots: [String], providerData: ProviderData, completion: @escaping (Result<Void, Error>) -> Void) {
+        let availabilityData: [String: Any] = [
+            "date": date,
+            "timeSlots": timeSlots,
+            "providerId": uid,
+            "providerName": providerData.name,
+            "occupation": providerData.occupation,
+            "placeOfWork": providerData.placeOfWork,
+            "updatedAt": FieldValue.serverTimestamp()
+        ]
+        
+        db.collection("users").document(uid).collection("availability").document(date).setData(availabilityData, merge: true) { error in
+            if let error = error {
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
+        }
+    }
+
+    func loadProviderAvailability(uid: String, date: String, completion: @escaping (Result<[String], Error>) -> Void) {
+        db.collection("users").document(uid).collection("availability").document(date).getDocument { snapshot, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            if let data = snapshot?.data(), let timeSlots = data["timeSlots"] as? [String] {
+                completion(.success(timeSlots))
+            } else {
+                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "No data found"])))
+            }
+        }
+    }
 }
+
 
 class HealthcarePageViewModel: ObservableObject {
     @Published var gender: String = ""

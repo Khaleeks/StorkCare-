@@ -5,97 +5,148 @@ struct ProviderData {
    var placeOfWork: String = ""
    var gender: String = ""
 }
-import SwiftUI
+
+import Foundation
 import FirebaseFirestore
 import FirebaseAuth
 
 class ProviderAvailabilityViewModel: ObservableObject {
     @Published var providerData: ProviderData = ProviderData()
-    @Published var selectedDate = Date()
+    @Published var selectedDate = Date() {
+        didSet {
+            loadExistingAvailability()
+        }
+    }
     @Published var selectedTimeSlots: Set<String> = []
     @Published var message: String? = nil
     @Published var isLoading = false
     @Published var showingConfirmation = false
     
-    private var db = Firestore.firestore()
+    private let firestoreService: FirestoreServiceProtocol
+    private let db = Firestore.firestore()
     
-    // Fetch provider data from Firestore
-    func loadProviderData() {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
+    init(firestoreService: FirestoreServiceProtocol = FirestoreService()) {
+        self.firestoreService = firestoreService
+    }
+    
+    func saveAvailability() {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            print("Debug: No user ID found")
+            self.message = "No user logged in"
+            return
+        }
         
-        db.collection("users").document(uid).getDocument { document, error in
-            if let document = document, document.exists, let data = document.data() {
-                DispatchQueue.main.async {
+        print("Debug: Starting save process")
+        isLoading = true
+        let dateString = formatDate(selectedDate)
+        
+        print("Debug: Selected time slots before saving: \(selectedTimeSlots)")
+        
+        // Create provider data object
+        let providerData = ProviderData(
+            name: self.providerData.name,
+            occupation: self.providerData.occupation,
+            placeOfWork: self.providerData.placeOfWork,
+            gender: self.providerData.gender
+        )
+        
+        // Convert Set to Array for saving
+        let timeSlotArray = Array(selectedTimeSlots)
+        print("Debug: Time slots being saved: \(timeSlotArray)")
+        
+        firestoreService.saveProviderAvailability(
+            uid: uid,
+            date: dateString,
+            timeSlots: timeSlotArray,
+            providerData: providerData
+        ) { [weak self] result in
+            guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                self.isLoading = false
+                
+                switch result {
+                case .success:
+                    print("Debug: Save successful")
+                    self.message = "Availability successfully saved!"
+                    // Verify the save by reloading
+                    self.loadExistingAvailability()
+                case .failure(let error):
+                    print("Debug: Save failed: \(error)")
+                    self.message = "Error saving availability: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+    func loadExistingAvailability() {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            self.message = "No user logged in"
+            return
+        }
+        
+        isLoading = true
+        let dateString = formatDate(selectedDate)
+        
+        firestoreService.loadProviderAvailability(uid: uid, date: dateString) { [weak self] result in
+            guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                self.isLoading = false
+                
+                switch result {
+                case .success(let timeSlots):
+                    self.selectedTimeSlots = Set(timeSlots)
+                case .failure(let error):
+                    self.message = "Error loading availability: \(error.localizedDescription)"
+                    self.selectedTimeSlots = []
+                }
+            }
+        }
+    }
+    
+    func loadProviderData() {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            self.message = "No user logged in"
+            return
+        }
+        
+        isLoading = true
+        
+        firestoreService.loadHealthcareProviderData(uid: uid) { [weak self] result in
+            guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                self.isLoading = false
+                
+                switch result {
+                case .success(let data):
                     self.providerData = ProviderData(
                         name: data["name"] as? String ?? "",
                         occupation: data["occupation"] as? String ?? "",
                         placeOfWork: data["placeOfWork"] as? String ?? "",
                         gender: data["gender"] as? String ?? ""
                     )
+                case .failure(let error):
+                    self.message = "Error loading provider data: \(error.localizedDescription)"
                 }
             }
         }
     }
     
-    
-    // Add the toggleTimeSlot method
-      func toggleTimeSlot(_ time: String) {
-          if selectedTimeSlots.contains(time) {
-              selectedTimeSlots.remove(time)
-          } else {
-              selectedTimeSlots.insert(time)
-          }
-      }
-    // Load existing availability for the selected date
-    func loadExistingAvailability() {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
-        
-        let dateString = formatDate(selectedDate)
-        
-        db.collection("users").document(uid)
-            .collection("availability")
-            .document(dateString)
-            .getDocument { document, error in
-                if let document = document, document.exists,
-                   let times = document.data()?["timeSlots"] as? [String] {
-                    DispatchQueue.main.async {
-                        self.selectedTimeSlots = Set(times)
-                    }
-                }
-            }
-    }
-    
-    // Save the availability to Firestore
-    func saveAvailability() {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
-        isLoading = true
-        
-        let dateString = formatDate(selectedDate)
-        let availabilityData: [String: Any] = [
-            "date": selectedDate,
-            "timeSlots": Array(selectedTimeSlots),
-            "providerId": uid,
-            "providerName": providerData.name,
-            "occupation": providerData.occupation,
-            "placeOfWork": providerData.placeOfWork,
-            "updatedAt": FieldValue.serverTimestamp()
-        ]
-        
-        db.collection("users").document(uid)
-            .collection("availability")
-            .document(dateString)
-            .setData(availabilityData) { error in
-                DispatchQueue.main.async {
-                    self.isLoading = false
-                    
-                }
-            }
-    }
-    
-    // Helper function to format the date to string
     private func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         return formatter.string(from: date)
     }
+    
+    func toggleTimeSlot(_ time: String) {
+           if selectedTimeSlots.contains(time) {
+               selectedTimeSlots.remove(time)
+           } else {
+               selectedTimeSlots.insert(time)
+           }
+       }
+    
+
 }
+
