@@ -31,16 +31,12 @@ class ProviderAvailabilityViewModel: ObservableObject {
     
     func saveAvailability() {
         guard let uid = Auth.auth().currentUser?.uid else {
-            print("Debug: No user ID found")
             self.message = "No user logged in"
             return
         }
         
-        print("Debug: Starting save process")
         isLoading = true
         let dateString = formatDate(selectedDate)
-        
-        print("Debug: Selected time slots before saving: \(selectedTimeSlots)")
         
         // Create provider data object
         let providerData = ProviderData(
@@ -50,14 +46,11 @@ class ProviderAvailabilityViewModel: ObservableObject {
             gender: self.providerData.gender
         )
         
-        // Convert Set to Array for saving
-        let timeSlotArray = Array(selectedTimeSlots)
-        print("Debug: Time slots being saved: \(timeSlotArray)")
-        
+        // Use FirestoreService instead of direct Firestore access
         firestoreService.saveProviderAvailability(
             uid: uid,
             date: dateString,
-            timeSlots: timeSlotArray,
+            timeSlots: Array(selectedTimeSlots),
             providerData: providerData
         ) { [weak self] result in
             guard let self = self else { return }
@@ -67,17 +60,14 @@ class ProviderAvailabilityViewModel: ObservableObject {
                 
                 switch result {
                 case .success:
-                    print("Debug: Save successful")
                     self.message = "Availability successfully saved!"
-                    // Verify the save by reloading
-                    self.loadExistingAvailability()
                 case .failure(let error):
-                    print("Debug: Save failed: \(error)")
                     self.message = "Error saving availability: \(error.localizedDescription)"
                 }
             }
         }
     }
+    
     func loadExistingAvailability() {
         guard let uid = Auth.auth().currentUser?.uid else {
             self.message = "No user logged in"
@@ -149,4 +139,3 @@ class ProviderAvailabilityViewModel: ObservableObject {
     
 
 }
-
