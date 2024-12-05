@@ -87,7 +87,7 @@ class ProviderAvailabilityViewModel: ObservableObject {
                 case .success(let timeSlots):
                     self.selectedTimeSlots = Set(timeSlots)
                 case .failure(let error):
-                    self.message = "Error loading availability: \(error.localizedDescription)"
+                    self.message = "Availability Status: \(error.localizedDescription)"
                     self.selectedTimeSlots = []
                 }
             }
