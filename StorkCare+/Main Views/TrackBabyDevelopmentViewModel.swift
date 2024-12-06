@@ -12,6 +12,7 @@ class TrackBabyDevelopmentViewModel: ObservableObject {
     @Published var validate = 0
     @Published var message: String? = nil
     @Published var isLoading = false
+    @Published var dateString: String = ""
 
     // Properties for trimester and progress
     @Published var weeksLeft: Int?
@@ -19,10 +20,7 @@ class TrackBabyDevelopmentViewModel: ObservableObject {
     @Published var currentTrimester: String = ""
     private let totalWeeks = 40 // Standard pregnancy length
     private let db = Firestore.firestore()
-    
-    init() {
-      loadConceptionData()
-    }
+
 
     func loadConceptionData() {
         guard let uid = Auth.auth().currentUser?.uid else {
@@ -40,7 +38,12 @@ class TrackBabyDevelopmentViewModel: ObservableObject {
                 
                 switch result {
                 case .success(let data):
-                    self.conceptionDate = (data["pregnancyStartDate"] as? Date)!
+                    self.dateString = (data["pregnancyStartDate"]) as? String ?? ""
+                    let dateFormatter = DateFormatter()
+                    dateFormatter.dateFormat = "yyyy-MM-dd"
+                    if let pregnancyTimestamp = data["pregnancyStartDate"] as? Timestamp {
+                        self.conceptionDate = pregnancyTimestamp.dateValue()
+                    }
                     self.validateConceptionDate()
                     if self.validate == 1 {
                         self.hasEntry = true
