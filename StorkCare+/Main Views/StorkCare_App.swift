@@ -21,7 +21,7 @@ struct StorkCare_App: App {
                 if authStateManager.isAuthenticated {
                     ContentRouterView(isAuthenticated: $authStateManager.isAuthenticated)
                 } else {
-                    IntroductionPage(isAuthenticated: $authStateManager.isAuthenticated)
+                    IntroductionPage()
                 }
             }
         }

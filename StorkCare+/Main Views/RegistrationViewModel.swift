@@ -13,7 +13,7 @@ class RegistrationViewModel: ObservableObject {
         @Published var uid: String = ""
         @Published var isEmailVerified: Bool = false  
 
-    private let db = Firestore.firestore()
+    public let db = Firestore.firestore()
 
     func registerUser() {
         if !validateEmail() {

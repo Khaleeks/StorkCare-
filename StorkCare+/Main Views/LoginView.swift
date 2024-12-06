@@ -2,7 +2,7 @@ import SwiftUI
 import FirebaseAuth
 
 struct LoginView: View {
-    @Binding var isAuthenticated: Bool
+    @State private var isAuthenticated: Bool = false
     @StateObject private var viewModel = LoginViewModel()
     
     var body: some View {

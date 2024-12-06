@@ -33,7 +33,7 @@ class ScheduleTelehealthViewModel: ObservableObject {
     @Published var confirmationMessage = ""
     @Published var showRescheduleOptions = false
 
-    private var db = Firestore.firestore()
+    public var db = Firestore.firestore()
     
    
     func loadAvailableSlots() {
@@ -86,7 +86,7 @@ class ScheduleTelehealthViewModel: ObservableObject {
 
 
 
-    private func loadProviders() {
+    public func loadProviders() {
         db.collection("users")
             .whereField("role", isEqualTo: "Healthcare Provider")
             .whereField("isOnboarded", isEqualTo: true)

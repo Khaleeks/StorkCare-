@@ -3,7 +3,7 @@ import FirebaseAuth
 
 struct RegistrationView: View {
     @Binding var isAuthenticated: Bool
-    @StateObject private var viewModel = RegistrationViewModel()
+    @ObservedObject var viewModel = RegistrationViewModel()
     
     var body: some View {
         VStack(spacing: 20) {

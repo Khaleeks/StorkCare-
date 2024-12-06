@@ -76,18 +76,25 @@ struct HealthcareContentView: View {
     }
     
     @ViewBuilder
+<<<<<<< HEAD
+        private func providerDestinationView(for useCase: String) -> some View {
+            switch useCase {
+            case "Set Provider Availability":
+                ProviderAvailabilityView()
+            case "View Scheduled Consultations":
+                ProviderAppointmentsListView() // Or Text("Consultations View"), depending on your preference.
+            default:
+                Text("Unknown use case")
+            }
+=======
     private func providerDestinationView(for useCase: String) -> some View {
         switch useCase {
         case "Set Provider Availability":
             ProviderAvailabilityView()
         case "View Scheduled Consultations":
-<<<<<<< Updated upstream
             ProviderAppointmentsListView()
-=======
-            Text("Consultations View")
->>>>>>> Stashed changes
         default:
             Text("Unknown use case")
+>>>>>>> ebcd9c0e62c91b2c7f6246098fcd0310d7d67bf5
         }
-    }
 }

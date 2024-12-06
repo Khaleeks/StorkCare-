@@ -1,8 +1,7 @@
 import SwiftUI
 
 struct IntroductionPage: View {
-    @Binding var isAuthenticated: Bool
-    
+    @State private var isAuthenticated: Bool = false
     var body: some View {
         VStack(spacing: 40) {
             Spacer()
@@ -38,7 +37,7 @@ struct IntroductionPage: View {
             
             VStack(spacing: 15) {
                 NavigationLink {
-                    LoginView(isAuthenticated: $isAuthenticated)
+                    LoginView()
                 } label: {
                     Text("Login")
                         .bold()

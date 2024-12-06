@@ -2,7 +2,7 @@ import SwiftUI
 import FirebaseFirestore
 
 struct ScheduleTelehealthView: View {
-    @StateObject var viewModel = ScheduleTelehealthViewModel()
+    @ObservedObject var viewModel = ScheduleTelehealthViewModel()
     @State private var shareHealthDataProfile: String = "No"
 
     var body: some View {
