@@ -1,23 +1,15 @@
 import XCTest
 @testable import StorkCare_
 
+// Mock Firestore Service for Testing
 class MockFirestoreService: FirestoreServiceProtocol {
-<<<<<<< HEAD
-    var shouldReturnError = false
+    var shouldReturnError: Bool = false
     var mockData: [String: Any] = [:]
     var mockTimeSlots: [String] = []
     
     func saveHealthcareProviderData(uid: String, name: String, gender: String, occupation: String, placeOfWork: String, completion: @escaping (Result<Void, Error>) -> Void) {
         if shouldReturnError {
-            completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Mock error"])))
-=======
-    // Add the property to simulate success or failure
-    var shouldReturnError: Bool = false
-
-    func saveHealthcareProviderData(uid: String, name: String, gender: String, occupation: String, placeOfWork: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        if shouldReturnError {
             completion(.failure(NSError(domain: "MockFirestoreService", code: -1, userInfo: [NSLocalizedDescriptionKey: "Simulated Error"])))
->>>>>>> ebcd9c0e62c91b2c7f6246098fcd0310d7d67bf5
         } else {
             completion(.success(()))
         }
@@ -55,8 +47,6 @@ class MockFirestoreService: FirestoreServiceProtocol {
         }
     }
 }
-
-
 
 // Test Class for HealthcarePageViewModel
 class HealthcarePageViewModelTests: XCTestCase {
