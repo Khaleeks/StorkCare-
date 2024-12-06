@@ -2,7 +2,7 @@ import SwiftUI
 
 struct PregnantWomanPage: View {
     let uid: String
-    @StateObject private var viewModel = PregnantWomanViewModel()
+    @ObservedObject var viewModel = PregnantWomanViewModel()
     @State private var showSexPicker = false
     @State private var showHeightPicker = false
     @State private var showWeightPicker = false

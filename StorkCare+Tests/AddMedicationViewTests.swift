@@ -8,7 +8,7 @@
 
 import XCTest
 import SwiftUI
-import ViewInspector // You need ViewInspector for detailed SwiftUI view testing
+import ViewInspector 
 @testable import StorkCare_
 
 final class AddMedicationViewTests: XCTestCase {

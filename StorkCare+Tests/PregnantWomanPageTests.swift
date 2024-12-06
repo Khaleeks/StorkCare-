@@ -7,7 +7,7 @@ class PregnantWomanPageTests: XCTestCase {
     
     func testTextFieldsAndButtons() throws {
         let viewModel = PregnantWomanViewModel()
-        let pregnantWomanPage = PregnantWomanPage(viewModel: viewModel, uid: "testUID")
+        let pregnantWomanPage = PregnantWomanPage(uid: "testUID")
         
         // Inspect the title text
         let title = try pregnantWomanPage.inspect().find(text: "Personalized Health Data")
@@ -21,7 +21,7 @@ class PregnantWomanPageTests: XCTestCase {
     
     func testPickerInteractions() throws {
         let viewModel = PregnantWomanViewModel()
-        let pregnantWomanPage = PregnantWomanPage(viewModel: viewModel, uid: "testUID")
+        let pregnantWomanPage = PregnantWomanPage(uid: "testUID")
         
         // Simulate toggling the height picker
         viewModel.showHeightPicker = true
@@ -41,7 +41,7 @@ class PregnantWomanPageTests: XCTestCase {
 
     func testFormFields() throws {
         let viewModel = PregnantWomanViewModel()
-        let pregnantWomanPage = PregnantWomanPage(viewModel: viewModel, uid: "testUID")
+        let pregnantWomanPage = PregnantWomanPage(uid: "testUID")
         
         // Inspect the name TextField
         let nameField = try pregnantWomanPage.inspect().find(viewWithTag: 1).textField()
@@ -55,8 +55,7 @@ class PregnantWomanPageTests: XCTestCase {
     
     func testContinueButtonFunctionality() throws {
         let viewModel = PregnantWomanViewModel()
-        let pregnantWomanPage = PregnantWomanPage(viewModel: viewModel, uid: "testUID")
-        
+        let pregnantWomanPage = PregnantWomanPage(uid: "testUID")
         // Set required fields
         viewModel.name = "Alice"
         viewModel.selectedSex = "Female"
@@ -73,7 +72,7 @@ class PregnantWomanPageTests: XCTestCase {
     
     func testIncompleteProfileData() throws {
         let viewModel = PregnantWomanViewModel()
-        let pregnantWomanPage = PregnantWomanPage(viewModel: viewModel, uid: "testUID")
+        let pregnantWomanPage = PregnantWomanPage(uid: "testUID")
         
         // Leave required fields empty
         viewModel.name = ""
@@ -111,8 +110,7 @@ class PregnantWomanPageTests: XCTestCase {
     
     func testAccessibilityLabels() throws {
         let viewModel = PregnantWomanViewModel()
-        let pregnantWomanPage = PregnantWomanPage(viewModel: viewModel, uid: "testUID")
-        
+        let pregnantWomanPage = PregnantWomanPage(uid: "testUID")
         // Locate the text field with the accessibility label "Name"
         let nameTextField = try pregnantWomanPage.inspect().find(ViewType.TextField.self, where: { view in
             let label = try view.accessibilityLabel().string()

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct IntroductionPage: View {
     @Binding var isAuthenticated: Bool
+    @StateObject private var viewModel = RegistrationViewModel()
     
     var body: some View {
         VStack(spacing: 40) {
@@ -36,7 +37,7 @@ struct IntroductionPage: View {
             
             Spacer()
             
-            NavigationLink(destination: RegistrationView(isAuthenticated: $isAuthenticated)) {
+            NavigationLink(destination: RegistrationView(isAuthenticated: $isAuthenticated, viewModel: viewModel)) {
                 Text("Continue")
                     .bold()
                     .frame(maxWidth: .infinity)

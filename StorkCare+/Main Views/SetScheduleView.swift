@@ -2,7 +2,7 @@ import SwiftUI
 
 struct SetScheduleView: View {
     @Binding var medications: [Medication]
-    @StateObject private var viewModel = SetScheduleViewModel()
+    @ObservedObject var viewModel: SetScheduleViewModel
     @State private var scheduleFrequency: String = "Every day"
     @State private var specificTimes: [String] = []
     @State private var capsuleQuantity: String = "1 capsule"

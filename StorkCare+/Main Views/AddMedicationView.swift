@@ -2,7 +2,7 @@ import SwiftUI
 
 struct AddMedicationView: View {
     @Binding var medications: [Medication]
-    @StateObject private var viewModel = AddMedicationViewModel()
+    @ObservedObject var viewModel = AddMedicationViewModel()
     @State private var medicationName: String = ""
     @State private var selectedMedicationType: String = "Capsule"
     @State private var showAlert = false
@@ -61,7 +61,7 @@ struct AddMedicationView: View {
         }
         .padding()
         .navigationDestination(isPresented: $showingSetSchedule) {
-            SetScheduleView(medications: $medications)
+            SetScheduleView(medications: $medications, viewModel: SetScheduleViewModel())
         }
     }
     
