@@ -1,3 +1,10 @@
+//
+//  ContentRouterView.swift
+//  StorkCare+
+//
+//  Created by Bamlak T on 12/5/24.
+//
+
 import SwiftUI
 import FirebaseFirestore
 import FirebaseAuth
@@ -6,6 +13,7 @@ struct ContentRouterView: View {
     @State private var userRole: String?
     @State private var isLoading = true
     @Binding var isAuthenticated: Bool
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         Group {
@@ -22,9 +30,25 @@ struct ContentRouterView: View {
                 }
             }
         }
-        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: signOut) {
+                    Text("Sign Out")
+                        .foregroundColor(.red)
+                }
+            }
+        }
         .onAppear {
             loadUserRole()
+        }
+    }
+    
+    private func signOut() {
+        do {
+            try Auth.auth().signOut()
+            dismiss()
+        } catch {
+            print("Error signing out: \(error.localizedDescription)")
         }
     }
     
@@ -32,7 +56,6 @@ struct ContentRouterView: View {
         guard let userId = Auth.auth().currentUser?.uid else {
             userRole = nil
             isLoading = false
-            isAuthenticated = false
             return
         }
         

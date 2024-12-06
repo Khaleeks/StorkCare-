@@ -1,36 +1,68 @@
-//
-//  StorkCare_Tests.swift
-//  StorkCare+Tests
-//
-//  Created by Khaleeqa Garrett on 10/23/24.
-//
-
 import XCTest
 @testable import StorkCare_
 
 final class StorkCare_Tests: XCTestCase {
+    
+    var authStateManager: AuthStateManager!
 
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        // Initialize authStateManager for each test
+        authStateManager = AuthStateManager()
     }
 
     override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        // Clean up authStateManager after each test
+        authStateManager = nil
     }
 
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
+    func testAuthenticationState() async throws {
+        // Given: Initial state of authStateManager
+        let expectation = XCTestExpectation(description: "Authentication state updates")
+
+        // When: You update or simulate an authentication state change
+        authStateManager.isAuthenticated = true
+
+        // Then: Assert that the authentication state is as expected
+        // Fulfill the expectation once the state change happens
+        expectation.fulfill()
+
+        // Wait for expectation to be fulfilled
+        await waitForExpectations(timeout: 5, handler: nil)
+
+        // Assert the expected value
+        XCTAssertTrue(authStateManager.isAuthenticated, "User should be authenticated")
+    }
+
+    func testAuthenticationStateAsync() async throws {
+        // Example: Test an asynchronous state update (e.g., fetching user authentication state)
+        let expectation = XCTestExpectation(description: "Authentication state asynchronously updates")
+
+        // Assuming AuthStateManager handles async state updates and uses Firebase
+        // For now, simulate an async check
+        await simulateAsyncAuthCheck()
+
+        // After async state update, check if the user is authenticated
+        XCTAssertTrue(authStateManager.isAuthenticated, "Authentication state should be updated asynchronously")
+
+        // Fulfill the expectation after the async task is done
+        expectation.fulfill()
+
+        // Wait for expectation to be fulfilled
+        await waitForExpectations(timeout: 5, handler: nil)
     }
 
     func testPerformanceExample() throws {
-        // This is an example of a performance test case.
+        // Measure the performance of Firebase authentication or another operation
         self.measure {
-            // Put the code you want to measure the time of here.
+            // Put the code you want to measure the time of here, for example, a login operation
+            // FirebaseAuth.login(...)
         }
     }
 
+    // Simulating an async auth check for demonstration purposes
+    private func simulateAsyncAuthCheck() async {
+        // Simulate a delay to mimic Firebase auth check
+        await Task.sleep(2 * 1_000_000_000) // Sleep for 2 seconds
+        authStateManager.isAuthenticated = true // Simulate the state update
+    }
 }

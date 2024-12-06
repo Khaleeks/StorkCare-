@@ -1,10 +1,12 @@
 import SwiftUI
 import FirebaseAuth
 
+
+
 struct PregnantWomanContentView: View {
     @State private var searchText: String = ""
-    @State private var medications: [Medication] = []
     @Binding var isAuthenticated: Bool
+    @State private var medications: [Medication] = []
     
     let useCases: [(title: String, icon: String, color: Color)] = [
         ("Track Baby Development", "chart.bar.fill", .pink),
@@ -66,9 +68,9 @@ struct PregnantWomanContentView: View {
                 .padding()
             }
         }
+        .navigationBarBackButtonHidden(true)
         .navigationTitle("StorkCare+")
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Sign Out") {
