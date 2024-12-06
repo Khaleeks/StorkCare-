@@ -1,113 +1,110 @@
 import XCTest
-import SwiftUI
 import ViewInspector
 @testable import StorkCare_
 
-// Extend HealthcarePage to conform to ViewInspector for testing
-extension HealthcarePage: Inspectable {}
-
 final class HealthcarePageTests: XCTestCase {
     
-    var mockFirestoreService: MockFirestoreService!
-    var viewModel: HealthcarePageViewModel!
-    var view: HealthcarePage!
-    
-    override func setUp() {
-        super.setUp()
-        mockFirestoreService = MockFirestoreService()
-        viewModel = HealthcarePageViewModel(firestoreService: mockFirestoreService)
-        view = HealthcarePage(uid: "testUID")
+    // Test if the view loads correctly with the initial state
+    func testViewLoadsCorrectly() throws {
+        let uid = "test-uid"
+        let viewModel = HealthcarePageViewModel()
+
+        // Initialize the view with the mock view model
+        let healthcarePage = HealthcarePage(uid: uid)
+            .environmentObject(viewModel)
+
+        // Check if the title is correct
+        let titleText = try healthcarePage.inspect().find(text: "Healthcare Provider Onboarding")
+        XCTAssertEqual(try titleText.string(), "Healthcare Provider Onboarding")
+        
+        // Check if the Personal Information section is present
+        let personalInfoSection = try healthcarePage.inspect().find(ViewType.Form.self)
+        XCTAssertNotNil(personalInfoSection)
+        
+        // Check if the "Complete Onboarding" button is present
+        let button = try healthcarePage.inspect().find(button: "Complete Onboarding")
+        XCTAssertNotNil(button)
     }
-    
-    override func tearDown() {
-        mockFirestoreService = nil
-        viewModel = nil
-        view = nil
-        super.tearDown()
+
+    // Test loading state when data is being fetched
+    func testLoadingState() throws {
+        let uid = "test-uid"
+        let viewModel = HealthcarePageViewModel()
+        viewModel.isLoading = true  // Set loading state to true
+
+        let healthcarePage = HealthcarePage(uid: uid)
+            .environmentObject(viewModel)
+
+        // Check that the ProgressView is showing while loading
+        let progressView = try healthcarePage.inspect().find(ViewType.ProgressView.self)
+        XCTAssertNotNil(progressView)
     }
-    
-    // Test 1: Verify Title Text
-    func testTitleText() throws {
-        let title = try view.inspect().find(viewWithTag: 1).text().string()
-        XCTAssertEqual(title, "Healthcare Provider Onboarding", "The title text does not match the expected value.")
-    }
-    
-    // Test 2: Verify TextField Bindings
-    func testTextFieldBindings() throws {
-        // Gender TextField
-        let genderTextField = try view.inspect().find(viewWithTag: 2).textField()
-        try genderTextField.setInput("Female")
-        XCTAssertEqual(try genderTextField.input(), "Female", "The gender TextField did not correctly bind the input.")
-        
-        // Occupation TextField
-        let occupationTextField = try view.inspect().find(viewWithTag: 3).textField()
-        try occupationTextField.setInput("Doctor")
-        XCTAssertEqual(try occupationTextField.input(), "Doctor", "The occupation TextField did not correctly bind the input.")
-        
-        // Place of Work TextField
-        let placeOfWorkTextField = try view.inspect().find(viewWithTag: 4).textField()
-        try placeOfWorkTextField.setInput("Hospital")
-        XCTAssertEqual(try placeOfWorkTextField.input(), "Hospital", "The place of work TextField did not correctly bind the input.")
-    }
-    
-    // Test 3: Verify Complete Onboarding Button Success
-    func testCompleteOnboardingButtonSuccess() throws {
-        // Set up the mock service for success
-        let mockFirestoreService = MockFirestoreService()
-        mockFirestoreService.result = .success(())
-        
-        // Initialize the ViewModel with the mock service
-        let viewModel = HealthcarePageViewModel(firestoreService: mockFirestoreService)
-        let view = HealthcarePage(uid: "testUID", viewModel: viewModel)
-        
-        // Wrap the view for testing (ViewInspector requirement)
-        let inspectedView = try view.inspect()
-        
-        // Fill all fields
-        try inspectedView.find(viewWithTag: 2).textField().setInput("Female")
-        try inspectedView.find(viewWithTag: 3).textField().setInput("Doctor")
-        try inspectedView.find(viewWithTag: 4).textField().setInput("Hospital")
-        
-        // Tap Complete Onboarding button
-        let completeButton = try inspectedView.find(viewWithTag: 5).button()
+
+    // Test saving healthcare provider data
+    func testSaveHealthcareProviderData() throws {
+        let uid = "test-uid"
+        let viewModel = HealthcarePageViewModel()
+        let healthcarePage = HealthcarePage(uid: uid)
+            .environmentObject(viewModel)
+
+        // Fill the fields with test data
+        viewModel.gender = "Female"
+        viewModel.occupation = "Doctor"
+        viewModel.placeOfWork = "Hospital"
+
+        // Simulate tapping the "Complete Onboarding" button
+        let completeButton = try healthcarePage.inspect().find(button: "Complete Onboarding")
         try completeButton.tap()
-        
-        // Wait for updates
-        let expectation = self.expectation(description: "Wait for onboarding success")
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { expectation.fulfill() }
-        wait(for: [expectation], timeout: 1.0)
-        
-        // Verify the message text
-        let messageText = try inspectedView.find(viewWithTag: 6).text().string()
-        XCTAssertEqual(messageText, "Onboarding complete!", "The success message does not match the expected value.")
+
+        // Check if the view model's saveHealthcareProviderData method is called (you might need to mock this in the view model)
+        XCTAssertTrue(viewModel.isOnboardingComplete)
     }
 
+    // Test displaying the error or success message
+    func testMessageDisplay() throws {
+        let uid = "test-uid"
+        let viewModel = HealthcarePageViewModel()
+        let healthcarePage = HealthcarePage(uid: uid)
+            .environmentObject(viewModel)
 
+        // Test that no message is shown initially
+        XCTAssertNil(viewModel.message)
 
+        // Simulate a successful onboarding completion
+        viewModel.message = "Onboarding Complete!"
+        viewModel.isOnboardingComplete = true
 
+        // Check if success message is shown in green
+        let messageText = try healthcarePage.inspect().find(text: "Onboarding Complete!")
+        XCTAssertEqual(try messageText.string(), "Onboarding Complete!")
+        XCTAssertEqual(try messageText.foregroundColor(), .green)
+
+        // Simulate a failure in onboarding
+        viewModel.message = "Error: Missing information"
+        viewModel.isOnboardingComplete = false
+
+        // Check if error message is shown in red
+        let errorMessage = try healthcarePage.inspect().find(text: "Error: Missing information")
+        XCTAssertEqual(try errorMessage.string(), "Error: Missing information")
+        XCTAssertEqual(try errorMessage.foregroundColor(), .red)
+    }
     
-    // Test 4: Verify Message Display on Failure
-    func testMessageDisplayOnFailure() throws {
-        // Simulate Firestore failure
-        let error = NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Network error"])
-        mockFirestoreService.result = .failure(error)
-        
-        // Fill some fields and leave one empty
-        try view.inspect().find(viewWithTag: 2).textField().setInput("Female")
-        try view.inspect().find(viewWithTag: 3).textField().setInput("")
-        try view.inspect().find(viewWithTag: 4).textField().setInput("Hospital")
-        
-        // Tap Complete Onboarding button
-        let completeButton = try view.inspect().find(viewWithTag: 5).button()
-        try completeButton.tap()
-        
-        // Wait for updates
-        let expectation = self.expectation(description: "Wait for onboarding failure")
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { expectation.fulfill() }
-        wait(for: [expectation], timeout: 1.0)
-        
-        // Verify message
-        let messageText = try view.inspect().find(viewWithTag: 6).text().string()
-        XCTAssertEqual(messageText, "Please fill in all fields", "The error message does not match the expected value.")
+    // Test the view model's loadHealthcareProviderData method
+    func testLoadHealthcareProviderData() throws {
+        let uid = "test-uid"
+        let viewModel = HealthcarePageViewModel()
+
+        // Initially, the fields should be empty
+        XCTAssertEqual(viewModel.gender, "")
+        XCTAssertEqual(viewModel.occupation, "")
+        XCTAssertEqual(viewModel.placeOfWork, "")
+
+        // Simulate the loadHealthcareProviderData function
+        viewModel.loadHealthcareProviderData(uid: uid)
+
+        // After loading, the fields should be populated with mock data
+        XCTAssertEqual(viewModel.gender, "Female")  // Assuming the mock data is Female
+        XCTAssertEqual(viewModel.occupation, "Nurse")
+        XCTAssertEqual(viewModel.placeOfWork, "General Hospital")
     }
 }

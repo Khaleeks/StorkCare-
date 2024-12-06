@@ -15,7 +15,7 @@ class ProviderAvailabilityViewTests: XCTestCase {
         mockViewModel.providerData = ProviderData(name: "Dr. Smith", occupation: "Doctor", placeOfWork: "StorkCare Clinic", gender: "Female") // Mock data
         mockViewModel.selectedTimeSlots = ["9:00 AM", "10:00 AM", "11:00 AM"]
         mockViewModel.selectedDate = Date()
-        providerAvailabilityView = ProviderAvailabilityView(viewModel: mockViewModel)
+        providerAvailabilityView = ProviderAvailabilityView(viewModel: self.mockViewModel)
     }
 
     func testProviderInfoCard() throws {
