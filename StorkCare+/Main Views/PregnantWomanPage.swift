@@ -1,7 +1,9 @@
 import SwiftUI
+import FirebaseAuth
 
 struct PregnantWomanPage: View {
     let uid: String
+    @Binding var isAuthenticated: Bool
     @StateObject private var viewModel = PregnantWomanViewModel()
     @State private var showSexPicker = false
     @State private var showHeightPicker = false
@@ -116,8 +118,10 @@ struct PregnantWomanPage: View {
                     .padding()
             }
         }
+        .navigationBarBackButtonHidden(true)
         .navigationDestination(isPresented: $viewModel.isProfileCreated) {
-            PregnantWomanContentView()
+            PregnantWomanContentView(isAuthenticated: $isAuthenticated)
+                .navigationBarBackButtonHidden(true)
         }
         .sheet(isPresented: $showSexPicker) {
             pickerView(title: "Select Sex", selection: $viewModel.selectedSex, options: ["Male", "Female", "Other"])
@@ -214,4 +218,12 @@ struct PregnantWomanPage: View {
             .padding()
         }
     }
+    private func signOut() {
+            do {
+                try Auth.auth().signOut()
+                isAuthenticated = false
+            } catch {
+                print("Error signing out: \(error.localizedDescription)")
+            }
+        }
 }

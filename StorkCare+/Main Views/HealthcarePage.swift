@@ -2,7 +2,8 @@ import SwiftUI
 
 struct HealthcarePage: View {
     let uid: String
-    @StateObject private var viewModel: HealthcarePageViewModel = HealthcarePageViewModel()
+    @Binding var isAuthenticated: Bool  // Add this line
+    @StateObject private var viewModel = HealthcarePageViewModel()
     
     var body: some View {
         VStack(spacing: 20) {
@@ -55,8 +56,8 @@ struct HealthcarePage: View {
         }
         .padding()
         .navigationDestination(isPresented: $viewModel.isOnboardingComplete) {
-            HealthcareContentView()
-        }
+                HealthcareContentView(isAuthenticated: $isAuthenticated)
+            }
         .onAppear {
             viewModel.loadHealthcareProviderData(uid: uid)
         }

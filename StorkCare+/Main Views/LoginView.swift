@@ -1,13 +1,13 @@
 import SwiftUI
 import FirebaseAuth
 
-struct RegistrationView: View {
+struct LoginView: View {
     @Binding var isAuthenticated: Bool
-    @StateObject private var viewModel = RegistrationViewModel()
+    @StateObject private var viewModel = LoginViewModel()
     
     var body: some View {
         VStack(spacing: 20) {
-            Text("Register for StorkCare+")
+            Text("Welcome Back to StorkCare+")
                 .font(.largeTitle)
                 .bold()
                 .padding()
@@ -17,39 +17,28 @@ struct RegistrationView: View {
                 .padding(.horizontal)
                 .autocapitalization(.none)
                 .keyboardType(.emailAddress)
-                .disabled(viewModel.isEmailVerified)
-
+            
             SecureField("Password", text: $viewModel.password)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding(.horizontal)
-                .disabled(viewModel.isEmailVerified)
-            
-            
-            Picker("Select Your Role", selection: $viewModel.role) {
-                Text("Healthcare Provider").tag("Healthcare Provider")
-                Text("Pregnant Woman").tag("Pregnant Woman")
-            }
-            .pickerStyle(SegmentedPickerStyle())
-            .padding(.horizontal)
-            .disabled(viewModel.isEmailVerified)
             
             Button(action: {
-                viewModel.registerUser()
+                viewModel.login()
             }) {
                 if viewModel.isLoading {
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle(tint: .white))
                 } else {
-                    Text(viewModel.isEmailVerified ? "Continue" : "Register")
+                    Text("Login")
                 }
             }
             .frame(maxWidth: .infinity)
             .padding()
-            .background(viewModel.role.isEmpty ? Color.gray : Color.pink)
+            .background(Color.pink)
             .foregroundColor(.white)
             .cornerRadius(10)
             .padding(.horizontal)
-            .disabled(viewModel.role.isEmpty || viewModel.isLoading)
+            .disabled(viewModel.isLoading)
             
             if let message = viewModel.message {
                 Text(message)
@@ -58,10 +47,9 @@ struct RegistrationView: View {
                     .padding()
             }
             
-            if viewModel.isEmailVerified {
-                Text("✓ Email verified")
-                    .foregroundColor(.green)
-                    .padding()
+            NavigationLink(destination: RegistrationView(isAuthenticated: $isAuthenticated)) {
+                Text("Don't have an account? Register")
+                    .foregroundColor(.blue)
             }
         }
         .padding()

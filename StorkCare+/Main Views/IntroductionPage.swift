@@ -36,18 +36,35 @@ struct IntroductionPage: View {
             
             Spacer()
             
-            NavigationLink(destination: RegistrationView(isAuthenticated: $isAuthenticated)) {
-                Text("Continue")
-                    .bold()
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.pink)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                    .padding(.horizontal)
+            VStack(spacing: 15) {
+                NavigationLink {
+                    LoginView(isAuthenticated: $isAuthenticated)
+                } label: {
+                    Text("Login")
+                        .bold()
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.pink)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+                
+                NavigationLink {
+                    RegistrationView(isAuthenticated: $isAuthenticated)
+                } label: {
+                    Text("Register")
+                        .bold()
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
             }
+            .padding(.horizontal)
         }
         .padding()
+        .navigationBarBackButtonHidden(true)
     }
 }
 
@@ -65,17 +82,10 @@ private struct FeatureRow: View {
                 Text(title)
                     .font(.headline)
                     .bold()
-                    .foregroundColor(.black)
                 Text(description)
                     .font(.subheadline)
-                    .foregroundColor(.black)
             }
         }
-    }
-}
-
-#Preview {
-    NavigationStack {
-        IntroductionPage(isAuthenticated: .constant(false))
+        .padding()
     }
 }

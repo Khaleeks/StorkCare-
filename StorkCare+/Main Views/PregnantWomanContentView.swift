@@ -1,17 +1,10 @@
-//
-//  PregnantWomanContentView.swift
-//  StorkCare+
-//
-//  Created by Bamlak T on 12/5/24.
-//
 import SwiftUI
 import FirebaseAuth
 
 struct PregnantWomanContentView: View {
     @State private var searchText: String = ""
     @State private var medications: [Medication] = []
-    @State private var isAuthenticated = true
-    @Environment(\.dismiss) private var dismiss
+    @Binding var isAuthenticated: Bool
     
     let useCases: [(title: String, icon: String, color: Color)] = [
         ("Track Baby Development", "chart.bar.fill", .pink),
@@ -20,60 +13,68 @@ struct PregnantWomanContentView: View {
     ]
     
     var filteredUseCases: [(title: String, icon: String, color: Color)] {
-        searchText.isEmpty
-            ? useCases
-            : useCases.filter { $0.title.lowercased().contains(searchText.lowercased()) }
+        searchText.isEmpty ? useCases : useCases.filter { $0.title.lowercased().contains(searchText.lowercased()) }
     }
-
+    
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 20) {
-                // Search Bar
-                HStack {
-                    TextField("Search...", text: $searchText)
-                        .padding(10)
-                        .background(Color(.systemGray6))
-                        .cornerRadius(10)
-                        .padding(.horizontal)
-
-                    Button(action: { /* Optional search action */ }) {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundColor(.pink)
-                            .padding()
-                    }
-                }
-                .font(.body)
-
-                // Health Categories Title
-                Text("Health Categories")
-                    .font(.system(size: 36, weight: .bold))
-                    .frame(maxWidth: .infinity, alignment: .leading)
+        VStack(spacing: 20) {
+            // Search Bar
+            HStack {
+                TextField("Search...", text: $searchText)
+                    .padding(10)
+                    .background(Color(.systemGray6))
+                    .cornerRadius(10)
                     .padding(.horizontal)
-
-                // Use Case List
-                List(filteredUseCases, id: \.title) { useCase in
-                    NavigationLink(destination: destinationView(for: useCase.title)) {
-                        HStack {
-                            Image(systemName: useCase.icon)
-                                .foregroundColor(useCase.color)
-                            Text(useCase.title)
-                                .foregroundColor(.black)
-                                .font(.body)
-                        }
-                        .padding(.vertical, 10)
-                    }
+                
+                Button(action: { /* Optional search action */ }) {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.pink)
+                        .padding()
                 }
-                .listStyle(PlainListStyle())
             }
-            .navigationTitle("StorkCare+")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: signOut) {
-                        Text("Sign Out")
-                            .foregroundColor(.red)
+            .font(.body)
+            
+            // Health Categories Title
+            Text("Health Categories")
+                .font(.system(size: 36, weight: .bold))
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal)
+            
+            // Use Case List
+            ScrollView {
+                VStack(spacing: 15) {
+                    ForEach(filteredUseCases, id: \.title) { useCase in
+                        NavigationLink(destination: destinationView(for: useCase.title)) {
+                            HStack {
+                                Image(systemName: useCase.icon)
+                                    .foregroundColor(useCase.color)
+                                    .font(.title2)
+                                Text(useCase.title)
+                                    .foregroundColor(.primary)
+                                    .font(.body)
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.gray)
+                            }
+                            .padding()
+                            .background(Color(.systemBackground))
+                            .cornerRadius(10)
+                            .shadow(radius: 2)
+                        }
                     }
                 }
+                .padding()
+            }
+        }
+        .navigationTitle("StorkCare+")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button("Sign Out") {
+                    signOut()
+                }
+                .foregroundColor(.red)
             }
         }
     }
@@ -82,8 +83,6 @@ struct PregnantWomanContentView: View {
         do {
             try Auth.auth().signOut()
             isAuthenticated = false
-            // Reset navigation to root view
-            dismiss()
         } catch {
             print("Error signing out: \(error.localizedDescription)")
         }
@@ -102,8 +101,4 @@ struct PregnantWomanContentView: View {
             Text("Unknown use case")
         }
     }
-}
-
-#Preview {
-    PregnantWomanContentView()
 }

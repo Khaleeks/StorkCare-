@@ -10,17 +10,16 @@ import FirebaseAuth
 
 struct HealthcareContentView: View {
     @State private var searchText: String = ""
+    @Binding var isAuthenticated: Bool
     @Environment(\.dismiss) private var dismiss
+    
     
     let useCases: [(title: String, icon: String, color: Color)] = [
         ("Set Provider Availability", "calendar", .green),
         ("View Scheduled Consultations", "video.fill", .purple)
     ]
-    
     var filteredUseCases: [(title: String, icon: String, color: Color)] {
-        searchText.isEmpty
-            ? useCases
-            : useCases.filter { $0.title.lowercased().contains(searchText.lowercased()) }
+        searchText.isEmpty ? useCases : useCases.filter { $0.title.lowercased().contains(searchText.lowercased()) }
     }
     
     var body: some View {
