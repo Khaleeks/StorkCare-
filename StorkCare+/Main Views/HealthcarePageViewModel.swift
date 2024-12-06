@@ -1,18 +1,23 @@
 import Foundation
 import FirebaseFirestore
+import FirebaseAuth
+
+
 
 protocol FirestoreServiceProtocol {
-    func saveHealthcareProviderData(uid: String, gender: String, occupation: String, placeOfWork: String, completion: @escaping (Result<Void, Error>) -> Void)
+    func saveHealthcareProviderData(uid: String, name:String, gender: String, occupation: String, placeOfWork: String, completion: @escaping (Result<Void, Error>) -> Void)
     func loadHealthcareProviderData(uid: String, completion: @escaping (Result<[String: Any], Error>) -> Void)
     func saveProviderAvailability(uid: String, date: String, timeSlots: [String], providerData: ProviderData, completion: @escaping (Result<Void, Error>) -> Void)
     func loadProviderAvailability(uid: String, date: String, completion: @escaping (Result<[String], Error>) -> Void)
 }
 
+
 class FirestoreService: FirestoreServiceProtocol {
     private let db = Firestore.firestore()
 
-    func saveHealthcareProviderData(uid: String, gender: String, occupation: String, placeOfWork: String, completion: @escaping (Result<Void, Error>) -> Void) {
+    func saveHealthcareProviderData(uid: String, name: String, gender: String, occupation: String, placeOfWork: String, completion: @escaping (Result<Void, Error>) -> Void) {
         let data: [String: Any] = [
+            "name": name,
             "gender": gender,
             "occupation": occupation,
             "placeOfWork": placeOfWork,
@@ -28,6 +33,8 @@ class FirestoreService: FirestoreServiceProtocol {
             }
         }
     }
+    
+    
 
     func loadHealthcareProviderData(uid: String, completion: @escaping (Result<[String: Any], Error>) -> Void) {
         db.collection("users").document(uid).getDocument { snapshot, error in
@@ -46,6 +53,7 @@ class FirestoreService: FirestoreServiceProtocol {
 
     func saveProviderAvailability(uid: String, date: String, timeSlots: [String], providerData: ProviderData, completion: @escaping (Result<Void, Error>) -> Void) {
         let availabilityData: [String: Any] = [
+            
             "date": date,
             "timeSlots": timeSlots,
             "providerId": uid,
@@ -82,6 +90,7 @@ class FirestoreService: FirestoreServiceProtocol {
 
 
 class HealthcarePageViewModel: ObservableObject {
+    @Published var name: String = ""
     @Published var gender: String = ""
     @Published var occupation: String = ""
     @Published var placeOfWork: String = ""
@@ -96,15 +105,16 @@ class HealthcarePageViewModel: ObservableObject {
     }
 
     func saveHealthcareProviderData(uid: String) {
-        guard !gender.isEmpty, !occupation.isEmpty, !placeOfWork.isEmpty else {
+        guard !name.isEmpty && !gender.isEmpty && !occupation.isEmpty && !placeOfWork.isEmpty else {
             self.message = "Please fill in all fields"
             self.isOnboardingComplete = false
             return
+
         }
         
         isLoading = true
         
-        firestoreService.saveHealthcareProviderData(uid: uid, gender: gender, occupation: occupation, placeOfWork: placeOfWork) { [weak self] result in
+        firestoreService.saveHealthcareProviderData(uid: uid, name:name, gender: gender, occupation: occupation, placeOfWork: placeOfWork) { [weak self] result in
             guard let self = self else { return }
             
             DispatchQueue.main.async {
@@ -133,6 +143,7 @@ class HealthcarePageViewModel: ObservableObject {
                 
                 switch result {
                 case .success(let data):
+                    self.name = data["name"] as? String ?? ""
                     self.gender = data["gender"] as? String ?? ""
                     self.occupation = data["occupation"] as? String ?? ""
                     self.placeOfWork = data["placeOfWork"] as? String ?? ""

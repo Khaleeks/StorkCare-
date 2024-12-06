@@ -18,6 +18,10 @@ struct HealthcarePage: View {
             } else {
                 Form {
                     Section(header: Text("Personal Information")) {
+                        
+                        TextField("Name", text: $viewModel.name)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    
                         TextField("Gender", text: $viewModel.gender)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                         
@@ -62,4 +66,4 @@ struct HealthcarePage: View {
             viewModel.loadHealthcareProviderData(uid: uid)
         }
     }
-}
+} 
