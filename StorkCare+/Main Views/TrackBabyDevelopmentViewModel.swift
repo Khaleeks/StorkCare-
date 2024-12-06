@@ -1,9 +1,7 @@
-
-
-
 import SwiftUI
 import Combine
 import FirebaseFirestore
+import FirebaseAuth
 
 class TrackBabyDevelopmentViewModel: ObservableObject {
     @Published var conceptionDate: Date = Date()
@@ -12,19 +10,84 @@ class TrackBabyDevelopmentViewModel: ObservableObject {
     @Published var errorMessage: String = ""
     @Published var hasEntry = false
     @Published var validate = 0
-    private var userInfo: testPregnantUser?
+    @Published var message: String? = nil
+    @Published var isLoading = false
 
     // Properties for trimester and progress
     @Published var weeksLeft: Int?
     @Published var trimesterProgress: CGFloat = 0.0
     @Published var currentTrimester: String = ""
-
     private let totalWeeks = 40 // Standard pregnancy length
+    private let db = Firestore.firestore()
+    
+    init() {
+      loadConceptionData()
+    }
 
+    func loadConceptionData() {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            self.message = "No user logged in"
+            return
+        }
+        
+        isLoading = true
+        let docRef = db.collection("users").document(uid)
+        loadPregnantData(uid: uid) { [weak self] result in
+            guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                self.isLoading = false
+                
+                switch result {
+                case .success(let data):
+                    self.conceptionDate = (data["pregnancyStartDate"] as? Date)!
+                    self.validateConceptionDate()
+                    if self.validate == 1 {
+                        self.hasEntry = true
+                    }
+                case .failure(let error):
+                    self.message = "Error loading provider data: \(error.localizedDescription)"
+                }
+            }
+        }
+    }
+    
+    func loadPregnantData(uid: String, completion: @escaping (Result<[String: Any], Error>) -> Void) {
+        db.collection("users").document(uid).getDocument { snapshot, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            if let data = snapshot?.data() {
+                completion(.success(data))
+            } else {
+                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "No data found"])))
+            }
+        }
+    }
+    func updateDatabase() {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            self.message = "No user logged in"
+            return
+        }
+        let data = [
+            "pregnancyStartDate": conceptionDate,
+        ]
+            db.collection("users").document(uid).updateData(data) { err in
+                if let err = err {
+                    print("Error updating document: \(err) ")
+                }
+                else {
+                    print("Document successfully updated")
+                }
+            }
+        }
+    
     func updateConceptionDate() {
-        userInfo = testPregnantUser(date: conceptionDate)
         validateConceptionDate()
         if validate == 1 {
+            updateDatabase()
             hasEntry = true
         }
     }
@@ -68,3 +131,4 @@ class TrackBabyDevelopmentViewModel: ObservableObject {
         }
     }
 }
+
