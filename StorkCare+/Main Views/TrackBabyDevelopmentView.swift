@@ -2,7 +2,6 @@ import SwiftUI
 
 struct TrackBabyDevelopmentView: View {
     @StateObject private var viewModel = TrackBabyDevelopmentViewModel()
-
     var body: some View {
         VStack(spacing: 20) {
             // Conditionally change the title based on whether the progress bar is displayed
@@ -19,7 +18,6 @@ struct TrackBabyDevelopmentView: View {
                     .padding()
                     .accessibilityIdentifier("TrackBabyDevelopmentTitle") // Accessibility Identifier
             }
-
             // Only show the button and the instructions if the progress bar is not shown yet
             if !viewModel.hasEntry || viewModel.currentWeek == nil {
                 // Error message for invalid conception date
@@ -30,7 +28,7 @@ struct TrackBabyDevelopmentView: View {
                         .padding()
                         .accessibilityIdentifier("ErrorMessage") // Accessibility Identifier
                 }
-
+                
                 // Instructions and button to calculate current week
                 if !viewModel.hasEntry {
                     Text("Please enter your conception date on the calendar and then click the button to update your start date.")
@@ -62,7 +60,7 @@ struct TrackBabyDevelopmentView: View {
                     .accessibilityIdentifier("CalculateCurrentWeekButton") // Accessibility Identifier
                 }
             }
-
+            
             // Display current week and trimester progress if the progress bar is shown
             if let currentWeek = viewModel.currentWeek, let weeksLeft = viewModel.weeksLeft {
                 Text("Current Week: \(currentWeek)")
@@ -73,14 +71,14 @@ struct TrackBabyDevelopmentView: View {
                 Text("Current Trimester: \(viewModel.currentTrimester)")
                     .font(.headline)
                     .accessibilityIdentifier("CurrentTrimesterLabel") // Accessibility Identifier
-
+                
                 // Display remaining weeks
                 Text("Weeks Left: \(weeksLeft)")
                     .font(.subheadline)
                     .foregroundColor(.gray)
                     .padding(.bottom, 8)
                     .accessibilityIdentifier("WeeksLeftLabel") // Accessibility Identifier
-
+                
                 // Progress bar with trimester sections
                 VStack(alignment: .leading) {
                     // Progress bar showing trimester progress
@@ -89,14 +87,14 @@ struct TrackBabyDevelopmentView: View {
                             .fill(Color.gray.opacity(0.2))
                             .frame(height: 20)
                             .accessibilityIdentifier("ProgressBarBackground") // Accessibility Identifier
-
+                        
                         RoundedRectangle(cornerRadius: 10)
                             .fill(Color.blue)
                             .frame(width: viewModel.trimesterProgress * UIScreen.main.bounds.width * 0.9, height: 20) // Progress bar width
                             .accessibilityIdentifier("ProgressBar") // Accessibility Identifier
                     }
                     .padding(.bottom, 8)
-
+                    
                     // Labels for each trimester
                     HStack {
                         Text("First Trimester")
@@ -115,7 +113,7 @@ struct TrackBabyDevelopmentView: View {
                 }
                 .padding()
             }
-
+            
             // Display development info for the current week
             if let _ = viewModel.currentWeek, let info = viewModel.developmentInfo {
                 Text("Size: \(info.size)")
@@ -131,5 +129,8 @@ struct TrackBabyDevelopmentView: View {
             }
         }
         .padding()
+        .onAppear{
+            viewModel.loadConceptionData()
+        }
     }
 }
