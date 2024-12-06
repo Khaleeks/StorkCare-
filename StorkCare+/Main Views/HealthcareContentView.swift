@@ -88,9 +88,9 @@ struct HealthcareContentView: View {
     private func providerDestinationView(for useCase: String) -> some View {
         switch useCase {
         case "Set Provider Availability":
-            ProviderAvailabilityView() // Navigate to the ProviderAvailabilityView
+            ProviderAvailabilityView()
         case "View Scheduled Consultations":
-            Text("Consultations View") // Create this view for viewing consultations
+            ProviderAppointmentsListView()
         default:
             Text("Unknown use case")
         }
